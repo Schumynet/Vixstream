@@ -6,15 +6,18 @@
   <title>FabioStream</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen">
-  <h1 class="text-4xl font-bold mb-6">🎬 FabioStream</h1>
-  <div class="flex gap-4 mb-4">
-    <input id="videoId" type="text" placeholder="ID contenuto VixSrc" class="px-4 py-2 rounded text-black" />
-    <button onclick="watch()" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">Guarda</button>
-  </div>
-  <video id="video" controls class="w-full max-w-3xl rounded shadow-lg"></video>
+<body class="bg-gray-900 text-white min-h-screen p-6">
+  <h1 class="text-4xl font-bold mb-6 text-center">🎬VixStream</h1>
 
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <div class="flex justify-center mb-6">
+    <input id="searchInput" type="text" placeholder="Cerca un film o serie..." class="px-4 py-2 rounded text-black w-1/2" />
+    <button onclick="search()" class="bg-blue-600 px-4 py-2 ml-2 rounded hover:bg-blue-700">Cerca</button>
+  </div>
+
+  <div id="results" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+
+  <div id="player" class="mt-10"></div>
+
   <script src="script.js"></script>
 </body>
 </html>
