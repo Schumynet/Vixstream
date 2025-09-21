@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FabioStream</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen">
+  <h1 class="text-4xl font-bold mb-6">🎬 FabioStream</h1>
+  <div class="flex gap-4 mb-4">
+    <input id="videoId" type="text" placeholder="ID contenuto VixSrc" class="px-4 py-2 rounded text-black" />
+    <button onclick="watch()" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">Guarda</button>
+  </div>
+  <video id="video" controls class="w-full max-w-3xl rounded shadow-lg"></video>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="script.js"></script>
+</body>
+</html>
