@@ -1,15 +1,14 @@
 // player.js
 
-// ─── CONFIGURAZIONE PROXY E API ────────────────────────────────────────────────
+// ─── CONFIGURAZIONE PROXY E PROGRESS API ─────────────────────────────────────
 const PROXY_BASE_URL   = 'https://vixstreamproxy.onrender.com/hls/';
 const PROGRESS_API_URL = 'https://vixstreamproxy.onrender.com/progress/save';
 const API_URL          = 'https://api.themoviedb.org/3';
 const API_KEY          = 'be78689897669066bef6906e501b0e10';
 
-// ─── VideoPlayer ──────────────────────────────────────────────────────────────
 class VideoPlayer {
   constructor() {
-    // Stato e variabili interne
+    // Stato interno
     this.hls               = null;
     this.content           = null;
     this.currentStreamId   = null;
@@ -53,6 +52,7 @@ class VideoPlayer {
     this.captionsMenu       = document.getElementById('captionsMenu');
 
     this.initEventListeners();
+    this.setupProgressTracking();
   }
 
   // ─── Avvia la riproduzione ─────────────────────────────────────────────────
@@ -102,7 +102,6 @@ class VideoPlayer {
       if (Hls.isSupported()) {
         if (this.hls) this.hls.destroy();
         this.hls = new Hls();
-
         this.hls.on(Hls.Events.ERROR, (evt, data) => {
           if (data.fatal) {
             this.showError('Errore nel flusso video');
@@ -142,7 +141,7 @@ class VideoPlayer {
     if (content.media_type === 'tv') {
       url = `${PROXY_BASE_URL}show/${content.id}/${content.season_number}/${content.episode_number}`;
     }
-    return `${url}?streamId=${this.currentStreamId}`;
+    return `${url}`;
   }
 
   // ─── Popola qualità video ────────────────────────────────────────────────────
@@ -250,174 +249,132 @@ class VideoPlayer {
   }
 
   // ─── Controlli standard ─────────────────────────────────────────────────────
-  togglePlayPause() {
-    if (this.videoPlayer.paused) this.videoPlayer.play();
-    else this.videoPlayer.pause();
-  }
-  updatePlayIcon(isPlaying) {
-    this.playIcon.className = isPlaying?'fas fa-pause':'fas fa-play';
-  }
+  togglePlayPause() { this.videoPlayer.paused ? this.videoPlayer.play() : this.videoPlayer.pause(); }
+  updatePlayIcon(isPlaying) { this.playIcon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play'; }
   toggleMute() {
-    if (this.videoPlayer.volume===0) {
-      this.videoPlayer.volume=1; this.volumeSlider.value=1; this.volumeIcon.className='fas fa-volume-up';
+    if (this.videoPlayer.volume === 0) {
+      this.videoPlayer.volume = 1; this.volumeSlider.value = 1; this.volumeIcon.className = 'fas fa-volume-up';
     } else {
-      this.videoPlayer.volume=0; this.volumeSlider.value=0; this.volumeIcon.className='fas fa-volume-mute';
+      this.videoPlayer.volume = 0; this.volumeSlider.value = 0; this.volumeIcon.className = 'fas fa-volume-mute';
     }
   }
   updateVolume(v) {
-    this.videoPlayer.volume=v;
-    if (v===0) this.volumeIcon.className='fas fa-volume-mute';
-    else if (v<0.5) this.volumeIcon.className='fas fa-volume-down';
-    else this.volumeIcon.className='fas fa-volume-up';
+    this.videoPlayer.volume = v;
+    this.volumeIcon.className = v == 0 ? 'fas fa-volume-mute'
+      : v < 0.5 ? 'fas fa-volume-down'
+      : 'fas fa-volume-up';
   }
   updateTimeDisplay() {
-    const c = this.videoPlayer.currentTime, d = this.videoPlayer.duration;
-    const fmt = (sec)=>
-      `${Math.floor(sec/60)}:${String(Math.floor(sec%60)).padStart(2,'0')}`;
-    this.currentTimeDisplay.textContent = fmt(c);
-    this.durationDisplay.textContent    = fmt(d);
-    this.progressBar.style.width = `${(c/d)*100}%`;
+    const fmt = sec => `${Math.floor(sec/60)}:${String(Math.floor(sec%60)).padStart(2,'0')}`;
+    this.currentTimeDisplay.textContent = fmt(this.videoPlayer.currentTime);
+    this.durationDisplay.textContent = fmt(this.videoPlayer.duration);
+    this.progressBar.style.width = `${(this.videoPlayer.currentTime / this.videoPlayer.duration) * 100}%`;
   }
 
-  startSeek(e) {
-    if (!this.videoPlayer.duration) return;
-    this.isSeeking = true;
-    this.handleSeek(e);
-  }
-  handleSeek(e) {
+  // ─── Seek manuale ───────────────────────────────────────────────────────────
+  startSeek(e)   { this.isSeeking = true; this.handleSeek(e); }
+  handleSeek(e)  {
     if (!this.isSeeking) return;
     const x = e.clientX || e.touches?.[0].clientX;
-    if (!x) return;
-    const r = this.progressContainer.getBoundingClientRect();
-    const pct = Math.min(1, Math.max(0, (x-r.left)/r.width));
-    this.videoPlayer.currentTime = pct*this.videoPlayer.duration;
+    const rect = this.progressContainer.getBoundingClientRect();
+    const pct = Math.min(1, Math.max(0, (x - rect.left) / rect.width));
+    this.videoPlayer.currentTime = pct * this.videoPlayer.duration;
   }
-  endSeek() { this.isSeeking = false; }
+  endSeek()      { this.isSeeking = false; }
 
-  handleTouchStart(e) {
-    this.touchStartX = e.touches[0].clientX;
-    this.touchStartTime = Date.now();
-  }
+  // ─── Touch gestures ─────────────────────────────────────────────────────────
+  handleTouchStart(e) { this.touchStartX = e.touches[0].clientX; this.touchStartTime = Date.now(); }
   handleTouchEnd(e) {
     const x = e.changedTouches[0].clientX;
     const w = this.videoPlayer.offsetWidth;
     const now = Date.now();
     if (now - this.lastTapTime < 300) {
-      if (x/w > 0.6) this.doSkipForward();
-      else if (x/w < 0.4) this.doSkipBackward();
+      x/w > 0.6 ? this.doSkipForward() : x/w < 0.4 ? this.doSkipBackward() : this.togglePlayPause();
       this.lastTapTime = 0;
       return;
     }
     this.lastTapTime = now;
-    if (x/w>0.4 && x/w<0.6) this.togglePlayPause();
   }
-  doSkipForward() {
-    this.videoPlayer.currentTime = Math.min(this.videoPlayer.duration, this.videoPlayer.currentTime+10);
-    this.skipForward.classList.add('forward');
-    setTimeout(()=>this.skipForward.classList.remove('forward'),300);
-  }
-  doSkipBackward() {
-    this.videoPlayer.currentTime = Math.max(0, this.videoPlayer.currentTime-10);
-    this.skipBackward.classList.add('backward');
-    setTimeout(()=>this.skipBackward.classList.remove('backward'),300);
-  }
+  doSkipForward()  { this.videoPlayer.currentTime = Math.min(this.videoPlayer.duration, this.videoPlayer.currentTime + 10); }
+  doSkipBackward() { this.videoPlayer.currentTime = Math.max(0, this.videoPlayer.currentTime - 10); }
 
+  // ─── Zoom & Fullscreen ──────────────────────────────────────────────────────
   toggleZoom() {
-    this.videoPlayer.classList.remove('video-zoom-1','video-zoom-2','video-zoom-3');
-    this.zoomLevel = this.zoomLevel<3? this.zoomLevel+1:1;
-    this.videoPlayer.classList.add(`video-zoom-${this.zoomLevel}`);
+    this.zoomLevel = this.zoomLevel < 3 ? this.zoomLevel + 1 : 1;
     const modes = ['contain','cover','fill'];
-    this.videoPlayer.style.objectFit = modes[this.zoomLevel-1];
+    this.videoPlayer.style.objectFit = modes[this.zoomLevel - 1];
   }
-
   isFullscreen() {
     const c = document.getElementById('videoContainer');
-    return !!(document.fullscreenElement===c||
-              document.webkitFullscreenElement===c||
-              document.mozFullScreenElement===c||
-              document.msFullscreenElement===c);
+    return !!(document.fullscreenElement === c);
   }
-
   toggleFullscreen() {
     const c = document.getElementById('videoContainer');
     if (!this.isFullscreen()) {
-      if (c.requestFullscreen) c.requestFullscreen();
-      else if (c.webkitRequestFullscreen) c.webkitRequestFullscreen();
-      document.fullscreenElement && screen.orientation?.lock('landscape').catch(()=>{});
+      c.requestFullscreen?.();
     } else {
-      document.exitFullscreen();
-      screen.orientation?.unlock?.();
+      document.exitFullscreen?.();
     }
   }
 
+  // ─── Menu interazioni ───────────────────────────────────────────────────────
   toggleMenu(type) {
-    this.settingsMenu.classList.toggle('active', type==='settings');
-    this.audioMenu.classList.toggle('active', type==='audio');
-    this.captionsMenu.classList.toggle('active', type==='captions');
+    this.settingsMenu.classList.toggle('active', type === 'settings');
+    this.audioMenu.classList.toggle('active', type === 'audio');
+    this.captionsMenu.classList.toggle('active', type === 'captions');
   }
-
   handleMenuSelection(e) {
-    const aq = e.target.closest('.quality-option');
-    if (aq) {
-      const q = aq.dataset.quality;
-      this.hls.currentLevel = q==='auto'? -1: parseInt(q);
-    }
-    const ao = e.target.closest('.audio-option');
-    if (ao) {
-      const a = parseInt(ao.dataset.audio);
-      this.hls.audioTrack = a;
-    }
-    const so = e.target.closest('.subtitle-option');
-    if (so) {
-      const s = so.dataset.subtitle==='none'? -1: parseInt(so.dataset.subtitle);
-      this.hls.subtitleTrack = s;
-    }
+    const q = e.target.closest('.quality-option');
+    if (q) this.hls.currentLevel = q.dataset.quality === 'auto' ? -1 : parseInt(q.dataset.quality);
+
+    const a = e.target.closest('.audio-option');
+    if (a) this.hls.audioTrack = parseInt(a.dataset.audio);
+
+    const s = e.target.closest('.subtitle-option');
+    if (s) this.hls.subtitleTrack = s.dataset.subtitle === 'none' ? -1 : parseInt(s.dataset.subtitle);
+
     const sp = e.target.closest('.speed-option');
-    if (sp) {
-      this.videoPlayer.playbackRate = parseFloat(sp.dataset.speed);
-    }
+    if (sp) this.videoPlayer.playbackRate = parseFloat(sp.dataset.speed);
+
     this.settingsMenu.classList.remove('active');
     this.audioMenu.classList.remove('active');
     this.captionsMenu.classList.remove('active');
   }
 
+  // ─── Controlli visibilità ───────────────────────────────────────────────────
   showControlsTemporarily() {
-    if (this.isMobile && !this.isFullscreen() && window.innerHeight>window.innerWidth) {
-      this.controlsContainer.style.opacity='1';
-      return;
-    }
     this.controlsContainer.classList.add('visible');
     clearTimeout(this._hideControls);
-    this._hideControls = setTimeout(()=>{
+    this._hideControls = setTimeout(() => {
       if (!this.videoPlayer.paused && !this.isSeeking) {
         this.controlsContainer.classList.remove('visible');
       }
-    },3000);
+    }, 3000);
   }
 
   initEventListeners() {
-    this.retryButton.addEventListener('click', ()=>this.initPlayer());
-    this.playPauseBtn.addEventListener('click', ()=>this.togglePlayPause());
-    this.videoPlayer.addEventListener('play', ()=>this.updatePlayIcon(true));
-    this.videoPlayer.addEventListener('pause', ()=>this.updatePlayIcon(false));
-    this.volumeBtn.addEventListener('click', ()=>this.toggleMute());
-    this.volumeSlider.addEventListener('input', e=>this.updateVolume(e.target.value));
-    this.videoPlayer.addEventListener('timeupdate', ()=>this.updateTimeDisplay());
-    this.progressContainer.addEventListener('mousedown', e=>this.startSeek(e));
-    document.addEventListener('mousemove', e=>this.handleSeek(e));
-    document.addEventListener('mouseup', ()=>this.endSeek());
-    this.videoPlayer.addEventListener('touchstart', e=>this.handleTouchStart(e));
-    this.videoPlayer.addEventListener('touchend', e=>this.handleTouchEnd(e));
-    this.skipForward.addEventListener('click', ()=>this.doSkipForward());
-    this.skipBackward.addEventListener('click', ()=>this.doSkipBackward());
-    this.zoomBtn.addEventListener('click', ()=>this.toggleZoom());
-    this.fullscreenBtn.addEventListener('click', ()=>this.toggleFullscreen());
-    this.closePlayerBtn.addEventListener('click', ()=>this.closePlayer());
-    this.settingsBtn.addEventListener('click', ()=>this.toggleMenu('settings'));
-    this.audioTrackBtn.addEventListener('click', ()=>this.toggleMenu('audio'));
-    this.captionsBtn.addEventListener('click', ()=>this.toggleMenu('captions'));
-    document.addEventListener('click', e=>this.handleMenuSelection(e));
-    this.videoPlayer.addEventListener('mousemove', ()=>this.showControlsTemporarily());
+    this.retryButton.addEventListener('click', () => this.initPlayer());
+    this.playPauseBtn.addEventListener('click', () => this.togglePlayPause());
+    this.videoPlayer.addEventListener('play', () => this.updatePlayIcon(true));
+    this.videoPlayer.addEventListener('pause', () => this.updatePlayIcon(false));
+    this.volumeBtn.addEventListener('click', () => this.toggleMute());
+    this.volumeSlider.addEventListener('input', e => this.updateVolume(e.target.value));
+    this.videoPlayer.addEventListener('timeupdate', () => this.updateTimeDisplay());
+    this.progressContainer.addEventListener('mousedown', e => this.startSeek(e));
+    document.addEventListener('mousemove', e => this.handleSeek(e));
+    document.addEventListener('mouseup', () => this.endSeek());
+    this.videoPlayer.addEventListener('touchstart', e => this.handleTouchStart(e));
+    this.videoPlayer.addEventListener('touchend', e => this.handleTouchEnd(e));
+    this.skipForward.addEventListener('click', () => this.doSkipForward());
+    this.skipBackward.addEventListener('click', () => this.doSkipBackward());
+    this.zoomBtn.addEventListener('click', () => this.toggleZoom());
+    this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+    this.closePlayerBtn.addEventListener('click', () => this.closePlayer());
+    this.settingsBtn.addEventListener('click', () => this.toggleMenu('settings'));
+    this.audioTrackBtn.addEventListener('click', () => this.toggleMenu('audio'));
+    this.captionsBtn.addEventListener('click', () => this.toggleMenu('captions'));
+    document.addEventListener('click', e => this.handleMenuSelection(e));
+    this.videoPlayer.addEventListener('mousemove', () => this.showControlsTemporarily());
   }
 
   // ─── Progress Tracking ─────────────────────────────────────────────────────
@@ -439,7 +396,7 @@ class VideoPlayer {
     if (!this.content || !d) return;
 
     const c = this.videoPlayer.currentTime;
-    const pct = (c/d)*100;
+    const pct = (c / d) * 100;
     if (pct < 5 || pct > 95) return;
 
     const ip = await this.getClientIP();
@@ -453,14 +410,16 @@ class VideoPlayer {
       duration: d,
       title: this.content.title
     };
+
     navigator.sendBeacon
       ? navigator.sendBeacon(PROGRESS_API_URL, JSON.stringify(payload))
       : fetch(PROGRESS_API_URL, {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify(payload),
-          keepalive:true
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true
         });
+
     this.lastProgressSave = now;
   }
 
@@ -469,82 +428,64 @@ class VideoPlayer {
       const r = await fetch('https://api.ipify.org?format=json');
       return (await r.json()).ip;
     } catch {
-      return `anon-${navigator.userAgent.slice(0,10)}-${Date.now()}`;
+      return `anon-${navigator.userAgent.slice(0, 10)}-${Date.now()}`;
     }
   }
 
   // ─── Next Episode ──────────────────────────────────────────────────────────
   toggleNextEpisodeButton() {
-    if (this.content.media_type==='tv' && this.content.season_number && this.content.episode_number) {
-      if (this.checkNextEpisodeExists()) this.nextEpisodeBtn.style.display='flex';
-      else this.nextEpisodeBtn.style.display='none';
+    if (this.content.media_type === 'tv' && this.content.season_number && this.content.episode_number) {
+      this.nextEpisodeBtn.style.display = this.checkNextEpisodeExists() ? 'flex' : 'none';
     } else {
-      this.nextEpisodeBtn.style.display='none';
+      this.nextEpisodeBtn.style.display = 'none';
     }
   }
 
   checkNextEpisodeExists() {
     if (!this.content.tv_data) return false;
-    const season = this.content.tv_data.seasons
-      .find(s=>s.season_number===this.content.season_number);
+    const season = this.content.tv_data.seasons.find(s => s.season_number === this.content.season_number);
     if (!season) return false;
     if (this.content.episode_number < season.episode_count) return true;
-    return this.content.tv_data.seasons
-      .some(s=>s.season_number===this.content.season_number+1);
+    return this.content.tv_data.seasons.some(s => s.season_number === this.content.season_number + 1);
   }
 
   async playNextEpisode() {
     if (!this.checkNextEpisodeExists()) return;
-    let s = this.content.season_number;
-    let e = this.content.episode_number+1;
-    const season = this.content.tv_data.seasons
-      .find(s=>s.season_number===this.content.season_number);
-    if (e > season.episode_count) { s++; e=1; }
-    if (!this.content.tv_data.seasons.some(s2=>s2.season_number===s)) return;
+    let s = this.content.season_number,
+        e = this.content.episode_number + 1;
+    const season = this.content.tv_data.seasons.find(s => s.season_number === this.content.season_number);
+    if (e > season.episode_count) { s++; e = 1; }
+    if (!this.content.tv_data.seasons.some(s2 => s2.season_number === s)) return;
 
-    this.hls?.destroy(); this.hls=null;
-    this.videoPlayer.pause(); this.videoPlayer.removeAttribute('src'); this.videoPlayer.load();
+    this.hls?.destroy();
+    this.videoPlayer.pause();
+    this.videoPlayer.removeAttribute('src');
+    this.videoPlayer.load();
 
-    this.content = { ...this.content, season_number:s, episode_number:e, episode_data:null };
-    this.updatePlayerTitle(); this.toggleNextEpisodeButton();
+    this.content = { ...this.content, season_number: s, episode_number: e, episode_data: null };
+    this.updatePlayerTitle();
+    this.toggleNextEpisodeButton();
     await this.initPlayer();
   }
 
   showResumePrompt(time, duration) {
-    const m = Math.floor(time/60), s = String(Math.floor(time%60)).padStart(2,'0');
+    const m = Math.floor(time / 60),
+          s = String(Math.floor(time % 60)).padStart(2, '0');
     const prompt = document.createElement('div');
-    prompt.className='resume-prompt';
-    prompt.innerHTML=`
+    prompt.className = 'resume-prompt';
+    prompt.innerHTML = `
       <div class="prompt-content">
         <p>Riprendi da ${m}:${s}?</p>
         <button class="resume-yes">Continua</button>
         <button class="resume-no">Ricomincia</button>
       </div>`;
-    const c = document.getElementById('videoContainer');
-    c.appendChild(prompt);
-    prompt.querySelector('.resume-yes').onclick = ()=>prompt.remove();
-    prompt.querySelector('.resume-no').onclick = ()=>{ this.videoPlayer.currentTime=0; prompt.remove(); };
-    setTimeout(()=>prompt.remove(),10000);
+    document.getElementById('videoContainer').appendChild(prompt);
+    prompt.querySelector('.resume-yes').onclick = () => prompt.remove();
+    prompt.querySelector('.resume-no').onclick = () => { this.videoPlayer.currentTime = 0; prompt.remove(); };
+    setTimeout(() => prompt.remove(), 10000);
   }
 
-  showNextEpisodePrompt() {
-    const prompt = document.createElement('div');
-    prompt.className='next-episode-prompt';
-    prompt.innerHTML=`
-      <div class="prompt-content">
-        <p>Passi al prossimo episodio?</p>
-        <button id="confirmNextEpisode">Sì</button>
-        <button id="cancelNextEpisode">No</button>
-      </div>`;
-    this.playerModal.appendChild(prompt);
-    document.getElementById('confirmNextEpisode')
-      .onclick = ()=>{ this.playNextEpisode(); prompt.remove(); };
-    document.getElementById('cancelNextEpisode')
-      .onclick = ()=>prompt.remove();
-    setTimeout(()=>prompt.remove(),30000);
-  }
-
-  // ─── Chiudi player ─────────────────────────────────────────────────────────
+  // ─── Close Player ──────────────────────────────────────────────────────────
   async closePlayer() {
     await this.savePlaybackProgress();
     this.abortController?.abort();
@@ -554,33 +495,37 @@ class VideoPlayer {
     this.videoPlayer.load();
     this.playerModal.classList.add('hidden');
     if (document.fullscreenElement) document.exitFullscreen();
-    screen.orientation?.unlock?.();
   }
 }
 
 // ─── ISTANZA E FUNZIONE DI AVVIO ─────────────────────────────────────────────
 const videoPlayerInstance = new VideoPlayer();
 
-function playMovie(content, type=null) {
-  if (typeof content==='number') {
-    content = { id:content, media_type:type||'movie', title:'Film' };
+function playMovie(content, type = null) {
+  if (typeof content === 'number') {
+    content = { id: content, media_type: type || 'movie', title: 'Film' };
   }
-  if (typeof content==='string' && content.includes('-')) {
+  if (typeof content === 'string' && content.includes('-')) {
     const [tvId, season, episode] = content.split('-');
     const epData = episodeMap.get(content);
     if (!epData) { console.error('Episodio sconosciuto'); return; }
     content = {
-      id:parseInt(tvId), media_type:'tv',
-      name:epData.tvData.name, title:epData.tvData.name,
-      season_number:parseInt(season), episode_number:parseInt(episode),
-      episode_data:epData.episodeData, tv_data:epData.tvData
+      id: parseInt(tvId),
+      media_type: 'tv',
+      name: epData.tvData.name,
+      title: epData.tvData.name,
+      season_number: parseInt(season),
+      episode_number: parseInt(episode),
+      episode_data: epData.episodeData,
+      tv_data: epData.tvData
     };
   }
-  if (content.media_type==='tv' && (!content.season_number||!content.episode_number)) {
-    showTVSeasons(content.id,'tv'); return;
+  if (content.media_type === 'tv' && (!content.season_number || !content.episode_number)) {
+    showTVSeasons(content.id, 'tv');
+    return;
   }
   videoPlayerInstance.play(content);
-  if (content.media_type==='tv') {
-    window.lastPlayedTV={ id:content.id, season:content.season_number };
+  if (content.media_type === 'tv') {
+    window.lastPlayedTV = { id: content.id, season: content.season_number };
   }
 }
