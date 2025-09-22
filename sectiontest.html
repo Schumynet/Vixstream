@@ -438,15 +438,25 @@ let modalType = 'movie';
   </script>
 
 <div id="modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
-  <div class="bg-gray-900 rounded-lg p-6 max-w-md w-full text-white relative">
+  <div class="bg-gray-900 rounded-lg p-6 max-w-2xl w-full text-white relative overflow-y-auto max-h-[90vh]">
     <button id="modal-close" class="absolute top-2 right-2 text-gray-400 hover:text-white text-xl">&times;</button>
+
     <img id="modal-poster" src="" alt="" class="w-full h-64 object-cover rounded mb-4">
     <h2 id="modal-title" class="text-xl font-bold mb-2"></h2>
     <p id="modal-overview" class="text-sm text-gray-300 mb-4"></p>
-    <div class="flex justify-between">
+
+    <div class="flex justify-end gap-4 mb-6">
       <button id="btn-watch" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">Guarda ora</button>
-      <button id="btn-info" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">Info</button>
       <button id="btn-back" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">Indietro</button>
+    </div>
+
+    <!-- Selettore stagioni ed episodi -->
+    <div id="season-episode-selector" class="mt-4 hidden">
+      <h3 class="text-sm font-semibold mb-2 text-white">Stagioni</h3>
+      <div id="season-carousel" class="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth mb-4"></div>
+
+      <h3 class="text-sm font-semibold mb-2 text-white">Episodi</h3>
+      <div id="episode-carousel" class="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth"></div>
     </div>
   </div>
 </div>
