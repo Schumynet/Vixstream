@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>VixStream</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        rel="stylesheet">
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <!-- HLS.js -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     body { background: #121212; color: #e5e5e5; }
@@ -22,9 +27,7 @@
       transition: background .2s;
     }
     .glass-button:hover { background: rgba(255,255,255,0.2); }
-    .modal-bg {
-      background: rgba(0,0,0,0.75);
-    }
+    .modal-bg { background: rgba(0,0,0,0.75); }
     .modal-content {
       background: #1f1f1f;
       border-radius: .5rem;
@@ -38,10 +41,15 @@
 
   <!-- HEADER -->
   <header class="fixed top-0 left-0 right-0 bg-black bg-opacity-50 backdrop-blur-md z-50">
-    <div class="max-w-6xl mx-auto flex justify-end p-4 space-x-2">
-      <div class="hidden md:flex items-center">
-        <input id="search-input" type="text" placeholder="Cerca..."
-               class="bg-gray-800 px-3 py-1 rounded-l focus:outline-none w-64 text-white">
+    <div class="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
+      <h1 class="text-2xl font-bold text-red-600">VixStream</h1>
+      <div class="hidden md:flex items-center space-x-2">
+        <input
+          id="search-input"
+          type="text"
+          placeholder="Cerca film o serie..."
+          class="bg-gray-800 text-white px-3 py-1 rounded-l focus:outline-none w-64"
+        />
         <button id="search-button" class="bg-gray-700 px-3 py-1 rounded-r hover:bg-gray-600">
           <i class="fas fa-search"></i>
         </button>
@@ -52,8 +60,12 @@
     </div>
     <div id="mobile-search-box" class="hidden bg-gray-800 bg-opacity-75 p-4">
       <div class="flex">
-        <input id="mobile-search-input" type="text" placeholder="Cerca..."
-               class="flex-1 bg-gray-700 px-3 py-2 rounded-l focus:outline-none text-white">
+        <input
+          id="mobile-search-input"
+          type="text"
+          placeholder="Cerca film o serie..."
+          class="flex-1 bg-gray-700 text-white px-3 py-2 rounded-l focus:outline-none"
+        />
         <button id="mobile-search-button" class="bg-gray-600 px-3 py-2 rounded-r hover:bg-gray-500">
           <i class="fas fa-search"></i>
         </button>
@@ -74,8 +86,12 @@
       </div>
       <p id="hero-overview" class="text-gray-300 mb-6"></p>
       <div class="flex justify-center space-x-4">
-        <button id="play-button" class="glass-button"><i class="fas fa-play mr-2"></i>Play</button>
-        <button id="more-info-button" class="glass-button"><i class="fas fa-info-circle mr-2"></i>Info</button>
+        <button id="play-button" class="glass-button">
+          <i class="fas fa-play mr-2"></i>Play
+        </button>
+        <button id="more-info-button" class="glass-button">
+          <i class="fas fa-info-circle mr-2"></i>Info
+        </button>
       </div>
     </div>
   </section>
@@ -87,36 +103,31 @@
       <section id="trending">
         <h2 class="text-2xl font-bold mb-4">Film in tendenza</h2>
         <div id="trending-movies"
-             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        </div>
+             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
       </section>
 
       <section id="popular-tv">
         <h2 class="text-2xl font-bold mb-4">Serie TV popolari</h2>
         <div id="popular-tv"
-             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        </div>
+             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
       </section>
 
       <section id="top-rated">
         <h2 class="text-2xl font-bold mb-4">Film più votati</h2>
         <div id="top-rated-movies"
-             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        </div>
+             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
       </section>
 
       <section id="upcoming">
         <h2 class="text-2xl font-bold mb-4">Film al cinema</h2>
         <div id="upcoming-movies"
-             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        </div>
+             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
       </section>
 
       <section id="continue-watching" class="hidden">
         <h2 class="text-2xl font-bold mb-4">Continua a guardare</h2>
         <div id="continue-watching-grid"
-             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        </div>
+             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
       </section>
 
       <section id="search-results" class="hidden">
@@ -124,15 +135,15 @@
           Risultati per: <span id="search-query-text" class="text-red-600"></span>
         </h2>
         <div id="search-results-grid"
-             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        </div>
+             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
       </section>
 
     </div>
   </main>
 
   <!-- MODALI -->
-  <div id="movie-modal" class="fixed inset-0 z-50 hidden items-center justify-center modal-bg p-4">
+  <div id="movie-modal"
+       class="fixed inset-0 z-50 hidden items-center justify-center modal-bg p-4">
     <div class="modal-content p-6 relative">
       <button id="close-modal"
               class="absolute top-4 right-4 text-white text-2xl">&times;</button>
@@ -210,13 +221,13 @@
       getHero();
       displayContinue();
 
-      // Search
+      // Search handlers
       document.getElementById('search-button').onclick = () => searchMedia();
       document.getElementById('search-input').onkeydown = e => { if(e.key==='Enter') searchMedia(); };
-      document.getElementById('mobile-search-button').onclick = () =>
-        searchMedia(document.getElementById('mobile-search-input').value);
+      document.getElementById('mobile-search-button').onclick = () => searchMedia(document.getElementById('mobile-search-input').value);
       document.getElementById('mobile-search-input').onkeydown = e => { if(e.key==='Enter') searchMedia(e.target.value); };
 
+      // Mobile search toggle
       const toggle = document.getElementById('mobile-search-toggle');
       toggle.onclick = e => {
         e.stopPropagation();
@@ -239,19 +250,25 @@
     });
 
     function createCard(item, type) {
-      const d = document.createElement('div');
-      d.className = 'cursor-pointer';
-      d.onclick = async () => {
+      const src = item.poster_path
+        ? POSTER_PATH + item.poster_path
+        : item.backdrop_path
+          ? IMG_PATH + item.backdrop_path
+          : 'https://via.placeholder.com/500x750?text=No+Image';
+      const div = document.createElement('div');
+      div.className = 'cursor-pointer';
+      div.onclick = async () => {
         const det = await getDetails(item.id, type);
         if (type === 'tv') showSeasons(item.id);
         else showMovie(det);
       };
-      d.innerHTML = `
-        <img src="${POSTER_PATH}${item.poster_path}" class="rounded-lg w-full h-64 object-cover">
+      div.innerHTML = `
+        <img src="${src}" class="rounded-lg w-full h-64 object-cover"/>
         <h3 class="mt-2 text-sm font-semibold truncate">${type==='tv'?item.name:item.title}</h3>
-        <p class="text-gray-400 text-xs">${((type==='tv'?item.first_air_date:item.release_date)||'').split('-')[0]||'N/A'}</p>
-      `;
-      return d;
+        <p class="text-gray-400 text-xs">${
+          ((type==='tv'?item.first_air_date:item.release_date)||'').split('-')[0]||'N/A'
+        }</p>`;
+      return div;
     }
 
     async function getDetails(id, type) {
@@ -266,32 +283,40 @@
       const d = await tmdbFetch('/trending/movie/week?');
       const c = document.getElementById('trending-movies');
       c.innerHTML = '';
-      d.results.filter(x => available.some(a=>a.tmdb_id===x.id))
-               .slice(0, 10).forEach(x => c.appendChild(createCard(x,'movie')));
+      d.results
+        .filter(x => available.some(a => a.tmdb_id === x.id))
+        .slice(0,10)
+        .forEach(x => c.appendChild(createCard(x,'movie')));
     }
 
     async function getPopularTv() {
       const d = await tmdbFetch('/tv/popular?');
       const c = document.getElementById('popular-tv');
       c.innerHTML = '';
-      d.results.filter(x => available.some(a=>a.tmdb_id===x.id))
-               .slice(0,10).forEach(x => c.appendChild(createCard(x,'tv')));
+      d.results
+        .filter(x => available.some(a => a.tmdb_id === x.id))
+        .slice(0,10)
+        .forEach(x => c.appendChild(createCard(x,'tv')));
     }
 
     async function getTopRated() {
       const d = await tmdbFetch('/movie/top_rated?');
       const c = document.getElementById('top-rated-movies');
       c.innerHTML = '';
-      d.results.filter(x => available.some(a=>a.tmdb_id===x.id))
-               .slice(0,10).forEach(x => c.appendChild(createCard(x,'movie')));
+      d.results
+        .filter(x => available.some(a => a.tmdb_id === x.id))
+        .slice(0,10)
+        .forEach(x => c.appendChild(createCard(x,'movie')));
     }
 
     async function getUpcoming() {
       const d = await tmdbFetch('/movie/upcoming?');
       const c = document.getElementById('upcoming-movies');
       c.innerHTML = '';
-      d.results.filter(x => available.some(a=>a.tmdb_id===x.id))
-               .slice(0,10).forEach(x => c.appendChild(createCard(x,'movie')));
+      d.results
+        .filter(x => available.some(a => a.tmdb_id === x.id))
+        .slice(0,10)
+        .forEach(x => c.appendChild(createCard(x,'movie')));
     }
 
     async function getHero() {
@@ -299,9 +324,11 @@
         tmdbFetch('/movie/popular?'),
         tmdbFetch('/tv/popular?')
       ]);
-      const all = [...m.results.map(i=>({...i, media_type:'movie'})),
-                   ...t.results.map(i=>({...i, media_type:'tv'}))];
-      const pick = all.filter(x => available.some(a=>a.tmdb_id===x.id));
+      const all = [
+        ...m.results.map(i => ({...i, media_type:'movie'})),
+        ...t.results.map(i => ({...i, media_type:'tv'}))
+      ];
+      const pick = all.filter(x => available.some(a => a.tmdb_id === x.id));
       if (!pick.length) return;
       const sel = pick[Math.floor(Math.random()*pick.length)];
       const det = await getDetails(sel.id, sel.media_type);
@@ -320,27 +347,32 @@
 
     async function searchMedia(q) {
       const query = (q||document.getElementById('search-input').value).trim();
-      if (!query) { document.getElementById('search-results').classList.add('hidden'); return; }
+      if (!query) {
+        document.getElementById('search-results').classList.add('hidden');
+        return;
+      }
       document.getElementById('search-query-text').textContent = `"${query}"`;
       document.getElementById('search-results').classList.remove('hidden');
-      const res = await fetch(`${TMDB}/search/multi?api_key=${API_KEY}&language=it-IT&query=${encodeURIComponent(query)}`);
-      const d = await res.json();
+      const res = await fetch(
+        `${TMDB}/search/multi?api_key=${API_KEY}&language=it-IT&query=${encodeURIComponent(query)}`
+      );
+      const data = await res.json();
       const grid = document.getElementById('search-results-grid');
       grid.innerHTML = '';
-      d.results.filter(x=>['movie','tv'].includes(x.media_type))
-               .filter(x=> available.some(a=>a.tmdb_id===x.id))
-               .forEach(x=> grid.appendChild(createCard(x,x.media_type)));
+      data.results
+        .filter(i => ['movie','tv'].includes(i.media_type))
+        .forEach(i => grid.appendChild(createCard(i, i.media_type)));
     }
 
     function showMovie(c) {
       const m = document.getElementById('movie-modal');
       m.classList.remove('hidden');
-      document.getElementById('modal-poster').src = c.poster_path? POSTER_PATH+c.poster_path:'';
+      document.getElementById('modal-poster').src = c.poster_path? POSTER_PATH + c.poster_path : '';
       document.getElementById('modal-title').textContent = c.title||c.name;
       document.getElementById('modal-rating').textContent = c.vote_average?.toFixed(1)||'N/A';
       document.getElementById('modal-year').textContent = ((c.media_type==='movie'?c.release_date:c.first_air_date)||'').split('-')[0]||'N/A';
       const run = c.media_type==='movie'?c.runtime:(c.episode_run_time?.[0]||0);
-      document.getElementById('modal-runtime').textContent = run?run+' min':'N/A';
+      document.getElementById('modal-runtime').textContent = run? run+' min':'N/A';
       document.getElementById('modal-overview').textContent = c.overview||'';
       document.getElementById('modal-genres').innerHTML = c.genres?.map(g=>`<span class="bg-gray-700 px-2 py-1 rounded text-xs">${g.name}</span>`).join('')||'';
       document.getElementById('modal-cast').innerHTML = c.credits?.cast.slice(0,5).map(a=>`<span class="bg-gray-700 px-2 py-1 rounded text-xs">${a.name}</span>`).join('')||'';
@@ -356,13 +388,14 @@
       const title = document.getElementById('selectorTitle');
       const cont = document.getElementById('selectorContent');
       sel.classList.remove('hidden');
-      title.textContent = 'Caricamento stagioni…';
+      title.textContent = 'Caricamento…';
       cont.innerHTML = '<p>...</p>';
       const d = await tmdbFetch(`/tv/${tvId}?`);
-      const seasons = d.seasons.filter(s=>s.episode_count>0);
+      const seasons = d.seasons.filter(s => s.episode_count>0);
       title.textContent = d.name;
-      cont.innerHTML = seasons.map(s=>`
-        <div class="cursor-pointer mb-4 p-2 bg-gray-800 rounded" onclick="showEpisodes(${tvId},${s.season_number})">
+      cont.innerHTML = seasons.map(s => `
+        <div class="cursor-pointer mb-4 p-2 bg-gray-800 rounded"
+             onclick="showEpisodes(${tvId},${s.season_number})">
           Stagione ${s.season_number} (${s.episode_count} ep)
         </div>
       `).join('');
@@ -377,23 +410,23 @@
       const title = document.getElementById('selectorTitle');
       const cont = document.getElementById('selectorContent');
       title.textContent = `Stagione ${seasonNum}`;
-      cont.innerHTML = '<p>Caricamento episodi…</p>';
+      cont.innerHTML = '<p>Caricamento…</p>';
       const [sd, td] = await Promise.all([
         tmdbFetch(`/tv/${tvId}/season/${seasonNum}?`),
         tmdbFetch(`/tv/${tvId}?`)
       ]);
       title.textContent = td.name + ' – Stagione ' + seasonNum;
-      cont.innerHTML = sd.episodes.map(ep=>`
-        <div class="cursor-pointer mb-4 p-2 bg-gray-800 rounded" onclick="playTV(${tvId},${seasonNum},${ep.episode_number})">
+      cont.innerHTML = sd.episodes.map(ep => `
+        <div class="cursor-pointer mb-4 p-2 bg-gray-800 rounded"
+             onclick="playTV(${tvId},${seasonNum},${ep.episode_number})">
           Ep ${ep.episode_number}: ${ep.name||''}
         </div>
       `).join('');
     }
 
-    function playTV(tvId, season, epNum) {
-      const content = { id: tvId, media_type:'tv', season, episode:epNum };
+    function playTV(tvId, season, episode) {
+      play({ id: tvId, media_type:'tv', season, episode });
       closeSeasonEpisodeSelector();
-      play(content);
     }
 
     function play(c) {
@@ -439,8 +472,13 @@
             if (it.contentType==='tv') playTV(it.tmdbId, it.season, it.episode);
             else play({ id: it.tmdbId, media_type:'movie' });
           };
+          const src = det.poster_path
+            ? POSTER_PATH + det.poster_path
+            : det.backdrop_path
+              ? IMG_PATH + det.backdrop_path
+              : 'https://via.placeholder.com/500x750?text=No+Image';
           card.innerHTML=`
-            <img src="${POSTER_PATH}${det.poster_path}" class="rounded-lg w-full h-64 object-cover">
+            <img src="${src}" class="rounded-lg w-full h-64 object-cover">
             <h3 class="mt-2 text-sm font-semibold truncate">${det.title||det.name}</h3>
           `;
           grid.appendChild(card);
