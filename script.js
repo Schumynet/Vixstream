@@ -177,3 +177,28 @@ async function initHomepage() {
 }
 
 document.addEventListener("DOMContentLoaded", initHomepage);
+
+async function loadCatalog() {
+  try {
+    const res = await fetch("/home/cards");
+    const data = await res.json();
+    const container = document.getElementById("catalog");
+
+    container.innerHTML = data.map(item => `
+      <div class="card">
+        <img src="${item.poster || 'fallback.jpg'}" alt="${item.title}" />
+        <div class="card-content">
+          <h3>${item.title}</h3>
+          <p>${item.overview.slice(0, 100)}...</p>
+          <p class="type">Tipo: ${item.type} | ⭐ ${item.rating}</p>
+          <a href="${item.hls}" target="_blank">Guarda ora</a>
+        </div>
+      </div>
+    `).join("");
+  } catch (err) {
+    console.error("Errore caricamento catalogo:", err);
+    document.getElementById("catalog").innerHTML = "<p>Errore nel caricamento dei contenuti.</p>";
+  }
+}
+
+loadCatalog();
