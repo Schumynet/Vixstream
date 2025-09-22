@@ -3,12 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Test VixStream – Ricerca & Sezioni</title>
+  <title>Test VixStream – Caroselli & Ricerca</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background: #121212; color: #e5e5e5; }
+
+    /* Nasconde la scrollbar */
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
     .poster { height: 300px; object-fit: cover; border-radius: 8px; }
     .dropdown-bg { background: #1f1f1f; }
+    .carousel-wrapper {
+      position: relative;
+    }
+    .carousel-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.5);
+      border: none;
+      padding: 0.5rem;
+      border-radius: 9999px;
+      color: #fff;
+      cursor: pointer;
+      z-index: 10;
+    }
+    .carousel-arrow.left { left: 0.5rem; }
+    .carousel-arrow.right { right: 0.5rem; }
   </style>
 </head>
 <body class="p-6">
@@ -84,33 +111,67 @@
   <!-- Sezione risultati ricerca -->
   <section id="results-section" class="max-w-6xl mx-auto mb-12 hidden">
     <h2 class="text-2xl font-bold mb-4">🔍 Risultati ricerca</h2>
-    <div id="results" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+    <div id="results" class="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth"></div>
   </section>
 
-  <!-- Sezioni TMDB standard -->
+  <!-- Caroselli TMDB -->
   <div class="max-w-6xl mx-auto space-y-16">
+
     <section>
       <h2 class="text-2xl font-bold mb-4">🎬 Film in tendenza</h2>
-      <div id="trending" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+      <div class="carousel-wrapper">
+        <button class="carousel-arrow left" data-target="trending">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div id="trending" class="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth"></div>
+        <button class="carousel-arrow right" data-target="trending">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
     </section>
 
     <section>
       <h2 class="text-2xl font-bold mb-4">📺 Serie TV popolari</h2>
-      <div id="tv" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+      <div class="carousel-wrapper">
+        <button class="carousel-arrow left" data-target="tv">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div id="tv" class="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth"></div>
+        <button class="carousel-arrow right" data-target="tv">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
     </section>
 
     <section>
       <h2 class="text-2xl font-bold mb-4">⭐ Film più votati</h2>
-      <div id="top" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+      <div class="carousel-wrapper">
+        <button class="carousel-arrow left" data-target="top">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div id="top" class="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth"></div>
+        <button class="carousel-arrow right" data-target="top">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
     </section>
 
     <section>
       <h2 class="text-2xl font-bold mb-4">🎞️ Film al cinema</h2>
-      <div id="upcoming" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+      <div class="carousel-wrapper">
+        <button class="carousel-arrow left" data-target="upcoming">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div id="upcoming" class="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth"></div>
+        <button class="carousel-arrow right" data-target="upcoming">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
     </section>
 
-    <!-- Sezioni per primi 6 generi -->
+    <!-- Caroselli per primi 6 generi -->
     <div id="genre-sections" class="space-y-16"></div>
+
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
@@ -130,6 +191,7 @@
       const year = (type === 'tv' ? item.first_air_date : item.release_date || '').split('-')[0] || 'N/A';
       const genres = (item.genre_ids || []).map(id => genreMap[id]).filter(Boolean).join(', ');
       const div = document.createElement('div');
+      div.className = 'min-w-[200px]';
       div.innerHTML = `
         <img src="${src}" alt="${title}" class="poster w-full mb-2"/>
         <h3 class="text-sm font-semibold truncate">${title}</h3>
@@ -139,12 +201,12 @@
       return div;
     }
 
-    async function loadSection(path, container, type) {
+    async function loadSection(path, containerId, type) {
       const res = await fetch(`${TMDB}${path}?api_key=${API_KEY}&language=it-IT`);
-      const data = await res.json();
-      const el = document.getElementById(container);
+      const { results } = await res.json();
+      const el = document.getElementById(containerId);
       el.innerHTML = '';
-      data.results.slice(0, 10).forEach(i => el.appendChild(createCard(i, type)));
+      results.slice(0, 10).forEach(i => el.appendChild(createCard(i, type)));
     }
 
     async function loadGenres() {
@@ -156,6 +218,7 @@
       genreList = [...mv.genres, ...tv.genres];
       genreList.forEach(g => genreMap[g.id] = g.name);
 
+      // dropdown generi
       const sel = document.getElementById('filter-genre');
       genreList.forEach(g => {
         const o = document.createElement('option');
@@ -163,14 +226,23 @@
         sel.appendChild(o);
       });
 
+      // crea caroselli per generi
       const container = document.getElementById('genre-sections');
       genreList.slice(0,6).forEach(g => {
-        const s = document.createElement('section');
-        s.innerHTML = `
+        const section = document.createElement('section');
+        section.innerHTML = `
           <h2 class="text-2xl font-bold mb-4">🎭 ${g.name}</h2>
-          <div id="genre-${g.id}" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+          <div class="carousel-wrapper">
+            <button class="carousel-arrow left" data-target="genre-${g.id}">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <div id="genre-${g.id}" class="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth"></div>
+            <button class="carousel-arrow right" data-target="genre-${g.id}">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
         `;
-        container.appendChild(s);
+        container.appendChild(section);
         loadSection(`/discover/movie?with_genres=${g.id}`, `genre-${g.id}`, 'movie');
       });
     }
@@ -184,64 +256,63 @@
 
       if (q) {
         const res = await fetch(`${TMDB}/search/multi?api_key=${API_KEY}&language=it-IT&query=${encodeURIComponent(q)}`);
-        const data = await res.json();
-        results = data.results;
+        results = (await res.json()).results;
       } else {
         if (!t || t === 'movie') {
           let url = `${TMDB}/discover/movie?api_key=${API_KEY}&language=it-IT`;
           if (y) url += `&primary_release_year=${y}`;
           if (g) url += `&with_genres=${g}`;
-          const d = await fetch(url).then(r => r.json());
-          results.push(...d.results);
+          results.push(...(await fetch(url).then(r => r.json())).results);
         }
         if (!t || t === 'tv') {
           let url = `${TMDB}/discover/tv?api_key=${API_KEY}&language=it-IT`;
           if (y) url += `&first_air_date_year=${y}`;
           if (g) url += `&with_genres=${g}`;
-          const d = await fetch(url).then(r => r.json());
-          results.push(...d.results);
+          results.push(...(await fetch(url).then(r => r.json())).results);
         }
       }
 
-      const filtered = results.filter(i => {
-        if (!['movie','tv'].includes(i.media_type || t)) return false;
-        return true;
-      });
-
+      const filtered = results.filter(i => ['movie','tv'].includes(i.media_type || t));
       const box = document.getElementById('results');
       box.innerHTML = '';
-      filtered.slice(0, 20).forEach(i => {
-        box.appendChild(createCard(i, i.media_type || (t || 'movie')));
-      });
+      filtered.slice(0, 20).forEach(i => box.appendChild(createCard(i, i.media_type || t || 'movie')));
       document.getElementById('results-section').classList.remove('hidden');
     }
 
+    function initCarousels() {
+      document.querySelectorAll('.carousel-arrow').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-target');
+          const dir = btn.classList.contains('left') ? -1 : 1;
+          const container = document.getElementById(id);
+          const scrollAmount = container.clientWidth * 0.7;
+          container.scrollBy({ left: scrollAmount * dir, behavior: 'smooth' });
+        });
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      // Caricamenti iniziali
+      // Inizializza dati
       loadGenres();
       loadSection('/trending/movie/week', 'trending', 'movie');
       loadSection('/tv/popular', 'tv', 'tv');
       loadSection('/movie/top_rated', 'top', 'movie');
       loadSection('/movie/upcoming', 'upcoming', 'movie');
 
-      // Toggla dropdown
+      // Gestione ricerca dropdown
       const bar = document.getElementById('search-bar');
       const dd  = document.getElementById('search-dropdown');
-
       bar.addEventListener('click', e => {
         e.stopPropagation();
         dd.classList.toggle('hidden');
         document.getElementById('filter-title').focus();
       });
-
-      // Impedisci la chiusura quando clicchi dentro la tendina
       dd.addEventListener('click', e => e.stopPropagation());
-
-      // Chiudi cliccando fuori
       document.addEventListener('click', () => dd.classList.add('hidden'));
-
-      // Bind ricerca
       document.getElementById('btn-search').onclick = doSearch;
+
+      // Inizializza caroselli
+      initCarousels();
     });
   </script>
 
