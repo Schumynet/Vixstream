@@ -1,27 +1,137 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>VixStream</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <script src="player.js" defer></script>
-  <script src="script.js" defer></script>
+  <!-- Stili base -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- FontAwesome per le icone -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    integrity="sha512-dNrGAmYRFPpZwbCbyxYQSbNnvE5YzVm+2uBMUWtXER7J+po3mg5ySNK3V6jkA/ynzQsqUzuZr7g5g+RIBbBlRw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
 </head>
-<body class="bg-gray-900 text-white min-h-screen p-6">
-  <header class="text-center mb-8">
-    <h1 class="text-4xl font-bold">🎬 VixStream</h1>
-    <p class="text-gray-400 mt-2">Cerca e guarda film e serie in streaming diretto</p>
+<body>
+  <header class="site-header">
+    <h1>VixStream</h1>
   </header>
 
-  <section class="flex justify-center mb-6">
-    <input id="searchInput" type="text" placeholder="Cerca un titolo..." class="px-4 py-2 rounded text-black w-2/3 max-w-xl" />
-    <button onclick="search()" class="bg-blue-600 px-4 py-2 ml-2 rounded hover:bg-blue-700">Cerca</button>
-  </section>
+  <main>
+    <!-- Sezione generi -->
+    <section id="genres">
+      <section class="genre-section" data-genre-id="28">
+        <h2>Action</h2>
+        <div class="movies-container" id="genre-28"></div>
+      </section>
+      <section class="genre-section" data-genre-id="35">
+        <h2>Comedy</h2>
+        <div class="movies-container" id="genre-35"></div>
+      </section>
+      <section class="genre-section" data-genre-id="18">
+        <h2>Drama</h2>
+        <div class="movies-container" id="genre-18"></div>
+      </section>
+      <section class="genre-section" data-genre-id="27">
+        <h2>Horror</h2>
+        <div class="movies-container" id="genre-27"></div>
+      </section>
+      <section class="genre-section" data-genre-id="10749">
+        <h2>Romance</h2>
+        <div class="movies-container" id="genre-10749"></div>
+      </section>
+      <section class="genre-section" data-genre-id="878">
+        <h2>Sci-Fi</h2>
+        <div class="movies-container" id="genre-878"></div>
+      </section>
+    </section>
+  </main>
 
-  <section id="results" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></section>
+  <!-- Player Modal -->
+  <div id="player-modal" class="hidden">
+    <div id="videoContainer">
+      <!-- Video element -->
+      <video id="videoPlayer" playsinline></video>
 
-  <section id="player" class="mt-10"></section>
+      <!-- Overlay caricamento -->
+      <div id="loadingOverlay" class="overlay hidden">
+        <i class="fas fa-spinner fa-spin"></i>
+      </div>
+
+      <!-- Overlay errore -->
+      <div id="errorOverlay" class="overlay hidden">
+        <p id="errorText">Errore nel caricamento</p>
+        <button id="retryButton">Riprova</button>
+      </div>
+
+      <!-- Pulsante “indietro” -->
+      <div id="backButtonContainer" class="back-button hidden">
+        <button id="backButton"><i class="fas fa-arrow-left"></i></button>
+      </div>
+
+      <!-- Controlli principali -->
+      <div id="controlsContainer" class="controls hidden">
+        <button id="skipBackward" class="control-btn"><i class="fas fa-backward"></i></button>
+        <button id="playPauseBtn" class="control-btn">
+          <i id="playIcon" class="fas fa-play"></i>
+        </button>
+        <button id="skipForward" class="control-btn"><i class="fas fa-forward"></i></button>
+        <div id="nextEpisodeBtn" class="control-btn hidden">
+          <i class="fas fa-step-forward"></i>
+        </div>
+
+        <div class="volume-control">
+          <button id="volumeBtn" class="control-btn"><i id="volumeIcon" class="fas fa-volume-up"></i></button>
+          <input id="volumeSlider" type="range" min="0" max="1" step="0.01">
+        </div>
+
+        <div class="time-display">
+          <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
+        </div>
+
+        <div id="progressContainer" class="progress-container">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+
+        <button id="settingsBtn" class="control-btn"><i class="fas fa-cog"></i></button>
+        <button id="zoomBtn" class="control-btn"><i class="fas fa-search-plus"></i></button>
+        <button id="fullscreenBtn" class="control-btn"><i class="fas fa-expand"></i></button>
+      </div>
+
+      <!-- Pulsante chiusura -->
+      <button id="close-player" class="close-btn"><i class="fas fa-times"></i></button>
+
+      <!-- Menu impostazioni generali -->
+      <div id="settingsMenu" class="settings-menu hidden">
+        <div class="menu-section">
+          <h3>Qualità</h3>
+          <div class="quality-options"></div>
+        </div>
+        <div class="menu-section">
+          <h3>Velocità</h3>
+          <div class="speed-options"></div>
+        </div>
+      </div>
+
+      <!-- Menu tracce audio -->
+      <div id="audioMenu" class="settings-menu hidden">
+        <h3>Audio</h3>
+        <div class="audio-options"></div>
+      </div>
+
+      <!-- Menu sottotitoli -->
+      <div id="captionsMenu" class="settings-menu hidden">
+        <h3>Sottotitoli</h3>
+        <div class="subtitle-options"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HLS.js e script del player -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="player.js"></script>
 </body>
 </html>
