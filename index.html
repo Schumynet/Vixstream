@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>VixStream</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Tailwind CSS -->
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <style>
     .lock-scroll {
       position: fixed;
@@ -22,10 +21,10 @@
   <header class="flex items-center justify-between p-4">
     <h1 class="text-2xl font-bold">VixStream</h1>
     <div class="hidden md:flex items-center space-x-2">
-      <input id="search-input" 
-             class="px-3 py-1 bg-gray-800 rounded focus:outline-none" 
+      <input id="search-input"
+             class="px-3 py-1 bg-gray-800 rounded focus:outline-none"
              type="text" placeholder="Cerca film o serie...">
-      <button id="search-button" 
+      <button id="search-button"
               class="px-3 py-1 bg-indigo-600 rounded hover:bg-indigo-500">
         <i class="fas fa-search"></i>
       </button>
@@ -33,12 +32,12 @@
     <div id="mobile-search-toggle" class="md:hidden p-2 cursor-pointer">
       <i class="fas fa-search"></i>
     </div>
-    <div id="mobile-search-box" 
+    <div id="mobile-search-box"
          class="absolute top-16 left-0 w-full bg-gray-800 p-4 space-x-2 transform scale-95 opacity-0 transition-all duration-200 md:hidden">
-      <input id="mobile-search-input" 
-             class="w-4/5 px-3 py-1 bg-gray-700 rounded focus:outline-none" 
+      <input id="mobile-search-input"
+             class="w-4/5 px-3 py-1 bg-gray-700 rounded focus:outline-none"
              type="text" placeholder="Cerca...">
-      <button id="mobile-search-button" 
+      <button id="mobile-search-button"
               class="w-1/5 px-3 py-1 bg-indigo-600 rounded hover:bg-indigo-500">
         <i class="fas fa-arrow-right"></i>
       </button>
@@ -47,16 +46,22 @@
 
   <!-- HERO -->
   <section class="relative h-[60vh] overflow-hidden">
-    <div id="hero-backdrop" 
+    <div id="hero-backdrop"
          class="absolute inset-0 bg-cover bg-center transition-opacity duration-500"></div>
     <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-gray-900"></div>
     <div class="relative z-10 p-8 max-w-2xl">
       <h2 id="hero-title" class="text-4xl font-bold mb-2">Caricamento...</h2>
       <p id="hero-overview" class="line-clamp-3 mb-4"></p>
-      <button id="hero-play" 
-              class="px-4 py-2 bg-red-600 rounded hover:bg-red-500">
-        <i class="fas fa-play mr-2"></i>Riproduci
-      </button>
+      <div class="space-x-2">
+        <button id="hero-watch"
+                class="px-4 py-2 bg-red-600 rounded hover:bg-red-500">
+          <i class="fas fa-play mr-2"></i>Guarda ora
+        </button>
+        <button id="hero-info"
+                class="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
+          <i class="fas fa-info-circle mr-2"></i>Info
+        </button>
+      </div>
     </div>
   </section>
 
@@ -84,11 +89,11 @@
     </section>
 
     <!-- SEARCH RESULTS OVERLAY -->
-    <section id="search-results-section" 
+    <section id="search-results-section"
              class="fixed inset-0 bg-black bg-opacity-75 hidden justify-center items-start pt-20">
-      <div id="search-results" 
+      <div id="search-results"
            class="bg-gray-800 rounded p-6 max-w-3xl w-full space-y-4 overflow-auto max-h-[80vh]">
-        <button onclick="clearSearch()" 
+        <button onclick="clearSearch()"
                 class="text-gray-400 hover:text-white mb-4">
           <i class="fas fa-times"></i> Chiudi
         </button>
@@ -99,7 +104,7 @@
   </main>
 
   <!-- SEASON/EPISODE SELECTOR -->
-  <div id="seasonEpisodeSelector" 
+  <div id="seasonEpisodeSelector"
        class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center p-4 transition-opacity scale-95 opacity-0">
     <div class="bg-gray-800 rounded-lg overflow-hidden w-full max-w-xl">
       <div class="p-4 border-b border-gray-700">
@@ -114,9 +119,9 @@
   </div>
 
   <!-- MOVIE/TV DETAIL MODAL -->
-  <div id="movie-modal" 
+  <div id="movie-modal"
        class="fixed inset-0 bg-black bg-opacity-75 hidden justify-center items-center p-4 overflow-auto">
-    <div id="movie-modal-content" 
+    <div id="movie-modal-content"
          class="bg-gray-800 rounded-lg overflow-hidden w-full max-w-3xl transform scale-95 opacity-0 transition-all duration-300">
       <div class="flex justify-between items-center p-4 border-b border-gray-700">
         <h2 id="modal-title" class="text-2xl font-semibold"></h2>
@@ -136,19 +141,19 @@
             <p id="modal-overview" class="mt-2"></p>
           </div>
         </div>
-        <button id="modal-play-button" 
+        <button id="modal-play-button"
                 class="w-full px-4 py-2 bg-red-600 rounded hover:bg-red-500">
-          <i class="fas fa-play mr-2"></i>Riproduci
+          <i class="fas fa-play mr-2"></i>Guarda ora
         </button>
       </div>
     </div>
   </div>
 
   <!-- PLAYER MODAL -->
-  <div id="player-modal" 
+  <div id="player-modal"
        class="fixed inset-0 bg-black bg-opacity-90 hidden justify-center items-center p-4">
     <div class="relative w-full max-w-3xl">
-      <button id="close-player" 
+      <button id="close-player"
               class="absolute top-2 right-2 text-white text-2xl z-10">
         <i class="fas fa-times"></i>
       </button>
@@ -158,28 +163,25 @@
     </div>
   </div>
 
-  <!-- HLS.js -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script>
     const PROXY_URL = 'https://vixstreamproxy.onrender.com/';
     let availableContent = [];
-    const episodeMap = new Map();
+    let episodeMap = new Map();
     let heroItem = null;
-    let scrollPosition = 0;
+    let scrollPos = 0;
 
-    // Scroll lock
     function lockScroll() {
-      scrollPosition = window.pageYOffset;
+      scrollPos = window.pageYOffset;
       document.body.classList.add('lock-scroll');
-      document.body.style.top = `-${scrollPosition}px`;
+      document.body.style.top = `-${scrollPos}px`;
     }
     function unlockScroll() {
       document.body.classList.remove('lock-scroll');
       document.body.style.top = '';
-      window.scrollTo(0, scrollPosition);
+      window.scrollTo(0, scrollPos);
     }
 
-    // Load available catalog
     async function loadAvailableContent() {
       try {
         const res = await fetch(`${PROXY_URL}home/available`);
@@ -189,28 +191,27 @@
       }
     }
 
-    // Helper: create a card
-    function createMovieCard(item, type) {
+    function createCard(item, type) {
       const card = document.createElement('div');
       card.className = 'cursor-pointer rounded overflow-hidden bg-gray-800';
       card.innerHTML = `
         <img src="https://image.tmdb.org/t/p/w300${item.poster_path}"
-             alt="${item.title||item.name}" class="w-full h-48 object-cover"/>
+             class="w-full h-48 object-cover" alt="">
         <div class="p-2">
           <h4 class="font-semibold truncate">${item.title||item.name}</h4>
-          <p class="text-sm text-gray-400">${type==='movie'
-            ? (item.release_date||'').split('-')[0]
-            : (item.first_air_date||'').split('-')[0]
+          <p class="text-sm text-gray-400">${
+            type==='movie'
+              ? (item.release_date||'').split('-')[0]
+              : (item.first_air_date||'').split('-')[0]
           }</p>
         </div>`;
-      card.addEventListener('click', () => {
+      card.onclick = () => {
         if (type==='tv') showTVSeasons(item.id);
-        else showMovieDetails({...item, media_type:'movie'});
-      });
+        else showMovieDetails({ id: item.id, media_type: 'movie' });
+      };
       return card;
     }
 
-    // Fetch & render sections
     async function getTrendingMovies() {
       const el = document.getElementById('trendingMovies');
       el.innerHTML = '';
@@ -218,8 +219,8 @@
         const { results } = await (await fetch(`${PROXY_URL}trending/movie/week`)).json();
         results
           .filter(m => availableContent.some(a => a.tmdb_id===m.id && a.type==='movie'))
-          .slice(0, 10)
-          .forEach(m => el.appendChild(createMovieCard(m,'movie')));
+          .slice(0,10)
+          .forEach(m => el.appendChild(createCard(m,'movie')));
       } catch {
         el.innerHTML = '<p class="text-gray-400">Errore caricamento</p>';
       }
@@ -231,8 +232,8 @@
         const { results } = await (await fetch(`${PROXY_URL}movie/top_rated`)).json();
         results
           .filter(m => availableContent.some(a => a.tmdb_id===m.id && a.type==='movie'))
-          .slice(0, 10)
-          .forEach(m => el.appendChild(createMovieCard(m,'movie')));
+          .slice(0,10)
+          .forEach(m => el.appendChild(createCard(m,'movie')));
       } catch {
         el.innerHTML = '<p class="text-gray-400">Errore caricamento</p>';
       }
@@ -244,8 +245,8 @@
         const { results } = await (await fetch(`${PROXY_URL}movie/upcoming`)).json();
         results
           .filter(m => availableContent.some(a => a.tmdb_id===m.id && a.type==='movie'))
-          .slice(0, 10)
-          .forEach(m => el.appendChild(createMovieCard(m,'movie')));
+          .slice(0,10)
+          .forEach(m => el.appendChild(createCard(m,'movie')));
       } catch {
         el.innerHTML = '<p class="text-gray-400">Errore caricamento</p>';
       }
@@ -257,58 +258,92 @@
         const { results } = await (await fetch(`${PROXY_URL}tv/popular`)).json();
         results
           .filter(tv => availableContent.some(a => a.tmdb_id===tv.id && a.type==='tv'))
-          .slice(0, 10)
-          .forEach(tv => el.appendChild(createMovieCard(tv,'tv')));
+          .slice(0,10)
+          .forEach(tv => el.appendChild(createCard(tv,'tv')));
       } catch {
         el.innerHTML = '<p class="text-gray-400">Errore caricamento</p>';
       }
     }
 
-    // Hero: random pick
     async function getRandomHeroContent() {
       try {
         const [mvRes, tvRes] = await Promise.all([
           fetch(`${PROXY_URL}movie/popular`),
           fetch(`${PROXY_URL}tv/popular`)
         ]);
-        const movies = (await mvRes.json()).results.map(i => ({...i, media_type:'movie'}));
-        const tvs    = (await tvRes.json()).results.map(i => ({...i, media_type:'tv'}));
-        const pool   = [...movies, ...tvs]
-                       .filter(i => availableContent.some(a=>a.tmdb_id===i.id && a.type===i.media_type));
+        const movies = (await mvRes.json()).results.map(i=>({...i,media_type:'movie'}));
+        const tvs    = (await tvRes.json()).results.map(i=>({...i,media_type:'tv'}));
+        const pool = [...movies,...tvs]
+          .filter(i => availableContent.some(a=>a.tmdb_id===i.id && a.type===i.media_type));
         if (!pool.length) return;
-        const pick  = pool[Math.floor(Math.random()*pool.length)];
+        const pick = pool[Math.floor(Math.random()*pool.length)];
         heroItem = pick;
-        const backdrop = `url(https://image.tmdb.org/t/p/original${pick.backdrop_path})`;
-        document.getElementById('hero-backdrop').style.backgroundImage = backdrop;
+        document.getElementById('hero-backdrop').style.backgroundImage =
+          `url(https://image.tmdb.org/t/p/original${pick.backdrop_path})`;
         document.getElementById('hero-title').textContent = pick.title||pick.name;
         document.getElementById('hero-overview').textContent = pick.overview||'';
       } catch {}
     }
 
-    // Search
-    async function searchMedia(query) {
-      const q = query || document.getElementById('search-input').value 
-                      || document.getElementById('mobile-search-input').value;
-      if (!q.trim()) return;
-      const res = await fetch(`${PROXY_URL}search?q=${encodeURIComponent(q)}`);
-      const data = await res.json();
+    async function showMovieDetails(item) {
+      const modal = document.getElementById('movie-modal');
+      const content = document.getElementById('movie-modal-content');
+      const [detail, credits] = await Promise.all([
+        fetch(`${PROXY_URL}${item.media_type}/${item.id}`).then(r=>r.json()),
+        fetch(`${PROXY_URL}${item.media_type}/${item.id}/credits`).then(r=>r.json())
+      ]);
+      document.getElementById('modal-title').textContent = detail.title||detail.name;
+      document.getElementById('modal-year').textContent = 
+        (detail.release_date||detail.first_air_date||'').slice(0,4);
+      document.getElementById('modal-runtime').textContent = 
+        `${detail.runtime||detail.episode_run_time?.[0]||0} min`;
+      document.getElementById('modal-rating').textContent = detail.vote_average.toFixed(1);
+      const genresEl = document.getElementById('modal-genres');
+      genresEl.innerHTML = detail.genres.map(g=>`<span class="px-2 py-1 bg-gray-700 rounded">${g.name}</span>`).join('');
+      const castEl = document.getElementById('modal-cast');
+      castEl.innerHTML = credits.cast.slice(0,8)
+        .map(c=>`<span class="px-2 py-1 bg-gray-700 rounded">${c.name}</span>`).join('');
+      document.getElementById('modal-overview').textContent = detail.overview||'';
+      document.getElementById('modal-play-button').onclick = () => {
+        playContent(item);
+        closeModal();
+      };
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        content.classList.replace('scale-95','scale-100');
+        content.classList.replace('opacity-0','opacity-100');
+      });
+    }
+    function closeModal() {
+      const modal = document.getElementById('movie-modal');
+      const content = document.getElementById('movie-modal-content');
+      content.classList.replace('opacity-100','opacity-0');
+      content.classList.replace('scale-100','scale-95');
+      setTimeout(()=> modal.classList.add('hidden'),300);
+    }
+
+    async function searchMedia(q) {
+      const query = q ||
+        document.getElementById('search-input').value ||
+        document.getElementById('mobile-search-input').value;
+      if (!query.trim()) return;
+      const data = await (await fetch(`${PROXY_URL}search?q=${encodeURIComponent(query)}`)).json();
       const list = data.results
-        .filter(i => ['movie','tv'].includes(i.media_type))
-        .filter(i => availableContent.some(a=>a.tmdb_id===i.id && a.type===i.media_type));
-      if (!list.length) return alert('Nessun risultato.');
+        .filter(i=>['movie','tv'].includes(i.media_type))
+        .filter(i=>availableContent.some(a=>a.tmdb_id===i.id&&a.type===i.media_type));
       showSearchResults(list);
     }
-    function showSearchResults(arr) {
-      const sec = document.getElementById('search-results-section');
+    function showSearchResults(list) {
+      const sec  = document.getElementById('search-results-section');
       const cont = document.getElementById('search-results-container');
       lockScroll();
       sec.classList.remove('hidden');
-      cont.innerHTML = arr.map(i => `
+      cont.innerHTML = list.map(i => `
         <div class="p-4 mb-2 bg-gray-700 rounded">
           <h4 class="font-semibold">${i.title||i.name}</h4>
           <p class="text-sm line-clamp-2">${i.overview||''}</p>
           <button class="mt-2 px-3 py-1 bg-red-600 rounded"
-                  onclick="handleResultClick(${i.id},'${i.media_type}',${JSON.stringify(i)})">
+                  onclick="handleResultClick(${i.id},'${i.media_type}')">
             Riproduci
           </button>
         </div>
@@ -318,14 +353,12 @@
       document.getElementById('search-results-section').classList.add('hidden');
       unlockScroll();
     }
-
-    async function handleResultClick(id, type, itemData) {
+    function handleResultClick(id,type) {
       clearSearch();
       if (type==='tv') showTVSeasons(id);
-      else playContent({ id, media_type:'movie' });
+      else playContent({id,media_type:'movie'});
     }
 
-    // Seasons & episodes
     async function showTVSeasons(tvId) {
       const modal = document.getElementById('seasonEpisodeSelector');
       const title = document.getElementById('selectorTitle');
@@ -337,64 +370,53 @@
       });
       title.textContent = 'Caricamento stagioni...';
       body.innerHTML = `<p class="text-center py-8"><i class="fas fa-spinner fa-spin"></i></p>`;
-      try {
-        const data = await (await fetch(`${PROXY_URL}tv/${tvId}`)).json();
-        const seasons = data.seasons.filter(s=>s.episode_count>0);
-        title.textContent = 'Seleziona Stagione';
-        body.innerHTML = seasons.map(s => `
-          <div class="cursor-pointer p-4 bg-gray-700 mb-2 rounded"
-               onclick="showEpisodes(${tvId},${s.season_number})">
-            Stagione ${s.season_number} — ${s.episode_count} episodi
-          </div>
-        `).join('');
-      } catch {
-        body.innerHTML = '<p class="text-red-500">Errore</p>';
-      }
+      const data = await (await fetch(`${PROXY_URL}tv/${tvId}`)).json();
+      const seasons = data.seasons.filter(s=>s.episode_count>0);
+      title.textContent = 'Seleziona Stagione';
+      body.innerHTML = seasons.map(s=>`
+        <div class="cursor-pointer p-4 bg-gray-700 mb-2 rounded"
+             onclick="showEpisodes(${tvId},${s.season_number})">
+          Stagione ${s.season_number}
+        </div>
+      `).join('');
     }
-    async function showEpisodes(tvId, season) {
+    async function showEpisodes(tvId,season) {
       const title = document.getElementById('selectorTitle');
       const body  = document.getElementById('selectorContent');
       title.textContent = `Episodi S${season}`;
       body.innerHTML = `<p class="text-center py-8"><i class="fas fa-spinner fa-spin"></i></p>`;
-      try {
-        const eps = (await (await fetch(`${PROXY_URL}tv/${tvId}/season/${season}`)).json()).episodes;
-        title.textContent = `Stagione ${season}`;
-        body.innerHTML = eps.map(ep => {
-          const key = `${tvId}-${season}-${ep.episode_number}`;
-          episodeMap.set(key, { tvId, season, epNum: ep.episode_number });
-          return `
-            <div class="cursor-pointer p-4 bg-gray-700 mb-2 rounded"
-                 onclick="playTVEpisode('${key}')">
-              ${ep.episode_number}. ${ep.name||'Senza titolo'}
-            </div>
-          `;
-        }).join('');
-      } catch {
-        body.innerHTML = '<p class="text-red-500">Errore</p>';
-      }
+      const eps = (await (await fetch(`${PROXY_URL}tv/${tvId}/season/${season}`)).json()).episodes;
+      title.textContent = `Stagione ${season}`;
+      body.innerHTML = eps.map(ep=>{
+        const key = `${tvId}-${season}-${ep.episode_number}`;
+        episodeMap.set(key,{tvId,season,ep:ep.episode_number});
+        return `
+          <div class="cursor-pointer p-4 bg-gray-700 mb-2 rounded"
+               onclick="playTVEpisode('${key}')">
+            ${ep.episode_number}. ${ep.name||''}
+          </div>
+        `;
+      }).join('');
+    }
+    function playTVEpisode(key) {
+      const {tvId,season,ep} = episodeMap.get(key);
+      playContent({id:tvId,media_type:'tv',season,episode:ep});
+      closeSeasonEpisodeSelector();
     }
     function closeSeasonEpisodeSelector() {
       const modal = document.getElementById('seasonEpisodeSelector');
-      modal.classList.replace('opacity-100','opacity-0');
-      modal.classList.replace('scale-100','scale-95');
-      setTimeout(()=> modal.classList.add('hidden'), 300);
-    }
-    function playTVEpisode(key) {
-      const { tvId, season, epNum } = episodeMap.get(key);
-      playContent({ id: tvId, media_type:'tv', season, episode: epNum });
-      closeSeasonEpisodeSelector();
+      const content = document.querySelector('#seasonEpisodeSelector > div');
+      content.classList.replace('opacity-100','opacity-0');
+      content.classList.replace('scale-100','scale-95');
+      setTimeout(()=> modal.classList.add('hidden'),300);
     }
 
-    // Play movie or episode
-    function playContent({ id, media_type, season, episode }) {
-      const playerModal = document.getElementById('player-modal');
-      const video = document.getElementById('videoPlayer');
-      let url;
-      if (media_type==='movie') {
-        url = `${PROXY_URL}hls/movie/${id}`;
-      } else {
-        url = `${PROXY_URL}hls/show/${id}/${season}/${episode}`;
-      }
+    function playContent(item) {
+      const player = document.getElementById('player-modal');
+      const video  = document.getElementById('videoPlayer');
+      let url = item.media_type==='movie'
+        ? `${PROXY_URL}hls/movie/${item.id}`
+        : `${PROXY_URL}hls/show/${item.id}/${item.season}/${item.episode}`;
       if (Hls.isSupported()) {
         const hls = new Hls();
         hls.loadSource(url);
@@ -403,39 +425,36 @@
         video.src = url;
       }
       lockScroll();
-      playerModal.classList.remove('hidden');
+      player.classList.remove('hidden');
       video.play();
-      video.ontimeupdate = () => saveProgress({ id, media_type, season, episode }, video);
-      video.onended = closePlayer;
+      video.ontimeupdate = ()=> saveProgress(item,video);
+      video.onended      = closePlayer;
     }
     function closePlayer() {
       const pm = document.getElementById('player-modal');
       const v  = document.getElementById('videoPlayer');
-      v.pause(); v.src=''; pm.classList.add('hidden');
-      unlockScroll();
+      v.pause(); v.src=''; pm.classList.add('hidden'); unlockScroll();
     }
 
-    // Save progress
-    async function saveProgress(detail, video) {
+    async function saveProgress(item,video) {
       try {
-        await fetch(`${PROXY_URL}progress/save`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        await fetch(`${PROXY_URL}progress/save`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
           body: JSON.stringify({
             ip: 'demo',
-            tmdbId: detail.id,
-            contentType: detail.media_type,
-            season: detail.season,
-            episode: detail.episode,
+            tmdbId: item.id,
+            contentType: item.media_type,
+            season: item.season,
+            episode: item.episode,
             currentTime: video.currentTime,
             duration: video.duration
           })
         });
-      } catch {}
+      } catch{}
     }
 
-    // INIT
-    document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', async ()=>{
       await loadAvailableContent();
       await getRandomHeroContent();
       getTrendingMovies();
@@ -443,62 +462,47 @@
       getUpcomingMovies();
       getPopularTv();
 
-      document.getElementById('search-button').onclick = () => searchMedia();
+      document.getElementById('hero-watch').onclick = ()=>{
+        if(heroItem) playContent(heroItem);
+      };
+      document.getElementById('hero-info').onclick = ()=>{
+        if(heroItem) showMovieDetails(heroItem);
+      };
+
+      document.getElementById('search-button').onclick = ()=> searchMedia();
       document.getElementById('search-input')
-              .addEventListener('keydown', e => e.key==='Enter' && searchMedia());
-      document.getElementById('mobile-search-button').onclick = () => {
-        searchMedia();
-        document.getElementById('mobile-search-box').classList.remove('active');
+              .addEventListener('keydown', e=> e.key==='Enter' && searchMedia());
+      document.getElementById('mobile-search-button').onclick = ()=>{
+        searchMedia(); document.getElementById('mobile-search-box').classList.remove('active');
       };
       document.getElementById('mobile-search-input')
-              .addEventListener('keydown', e => e.key==='Enter' && searchMedia());
+              .addEventListener('keydown', e=> e.key==='Enter' && searchMedia());
 
-      // mobile search toggle
       const toggle = document.getElementById('mobile-search-toggle');
       const box    = document.getElementById('mobile-search-box');
-      toggle.onclick = e => {
-        e.stopPropagation();
-        box.classList.toggle('active');
-        if (box.classList.contains('active')) {
-          setTimeout(()=>document.getElementById('mobile-search-input').focus(), 50);
-        }
+      toggle.onclick = e=>{ e.stopPropagation(); box.classList.toggle('active');
+        if(box.classList.contains('active')) setTimeout(()=>document.getElementById('mobile-search-input').focus(),50);
       };
-      document.addEventListener('click', e => {
-        if (!box.contains(e.target) && !toggle.contains(e.target)) {
-          box.classList.remove('active');
-        }
+      document.addEventListener('click', e=>{
+        if(!box.contains(e.target)&&!toggle.contains(e.target)) box.classList.remove('active');
       });
 
-      // close movie modal
-      document.getElementById('close-modal').onclick = () => {
-        const m = document.getElementById('movie-modal-content');
-        m.classList.replace('opacity-100','opacity-0');
-        m.classList.replace('scale-100','scale-95');
-        setTimeout(()=> document.getElementById('movie-modal').classList.add('hidden'), 300);
-      };
-      window.addEventListener('keydown', e => {
-        if (e.key==='Escape') {
+      document.getElementById('close-modal').onclick = closeModal;
+      window.addEventListener('keydown', e=>{
+        if(e.key==='Escape'){
           closeSeasonEpisodeSelector();
           closePlayer();
-          const mm = document.getElementById('movie-modal');
-          if (!mm.classList.contains('hidden')) {
-            const mc = document.getElementById('movie-modal-content');
-            mc.classList.replace('opacity-100','opacity-0');
-            mc.classList.replace('scale-100','scale-95');
-            setTimeout(()=> mm.classList.add('hidden'), 300);
-          }
+          if(!document.getElementById('movie-modal').classList.contains('hidden')) closeModal();
         }
       });
-      window.addEventListener('click', e => {
-        if (e.target === document.getElementById('player-modal')) closePlayer();
+      window.addEventListener('click', e=>{
+        if(e.target===document.getElementById('player-modal')) closePlayer();
       });
 
-      // register service worker (optional)
-      if ('serviceWorker' in navigator) {
+      if('serviceWorker' in navigator){
         navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
       }
     });
   </script>
-
 </body>
 </html>
