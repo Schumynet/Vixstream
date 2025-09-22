@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Test Sezioni TMDB</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #121212; color: #e5e5e5; }
+    .poster { height: 300px; object-fit: cover; border-radius: 8px; }
+  </style>
+</head>
+<body class="p-6">
+
+  <h1 class="text-3xl font-bold mb-6 text-red-500">Test Sezioni da TMDB</h1>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">🎬 Film in tendenza</h2>
+    <div id="trending" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">📺 Serie TV popolari</h2>
+    <div id="tv" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">⭐ Film più votati</h2>
+    <div id="top" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">🎞️ Film al cinema</h2>
+    <div id="upcoming" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
+  </section>
+
+  <script>
+    const API_KEY = '1e8c9083f94c62dd66fb2105cd7b613b';
+    const TMDB = 'https://api.themoviedb.org/3';
+    const POSTER_PATH = 'https://image.tmdb.org/t/p/w500';
+
+    function createCard(item, type) {
+      const src = item.poster_path
+        ? POSTER_PATH + item.poster_path
+        : item.backdrop_path
+          ? POSTER_PATH + item.backdrop_path
+          : 'https://via.placeholder.com/500x750?text=No+Image';
+
+      const title = type === 'tv' ? item.name : item.title;
+      const year = (type === 'tv' ? item.first_air_date : item.release_date || '').split('-')[0] || 'N/A';
+
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <img src="${src}" alt="${title}" class="poster w-full mb-2"/>
+        <h3 class="text-sm font-semibold truncate">${title}</h3>
+        <p class="text-gray-400 text-xs">${year}</p>
+      `;
+      return div;
+    }
+
+    async function loadSection(endpoint, containerId, type) {
+      try {
+        const res = await fetch(`${TMDB}${endpoint}?api_key=${API_KEY}&language=it-IT`);
+        const data = await res.json();
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        data.results.slice(0, 10).forEach(item => {
+          container.appendChild(createCard(item, type));
+        });
+      } catch (err) {
+        console.error(`Errore nella sezione ${containerId}:`, err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSection('/trending/movie/week', 'trending', 'movie');
+      loadSection('/tv/popular', 'tv', 'tv');
+      loadSection('/movie/top_rated', 'top', 'movie');
+      loadSection('/movie/upcoming', 'upcoming', 'movie');
+    });
+  </script>
+
+</body>
+</html>
