@@ -1,8 +1,13 @@
 const BACKEND_URL = "https://vixstreamproxy.onrender.com";
-const TMDB_API_KEY = "be78689897669066bef6906e501b0e10"; // usa la tua chiave
+const TMDB_API_KEY = "be78689897669066bef6906e501b0e10";
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const IMAGE_BASE = "https://image.tmdb.org/t/p/w300";
-const catalogContainer = document.getElementById("catalogo");
+
+const sections = {
+  movie: document.getElementById("sezione-film"),
+  tv: document.getElementById("sezione-serie"),
+  episode: document.getElementById("sezione-episodi")
+};
 
 async function loadCatalog() {
   const disponibili = await fetch(`${BACKEND_URL}/home/available`).then(r => r.json());
@@ -10,13 +15,14 @@ async function loadCatalog() {
   for (const item of disponibili) {
     try {
       let tmdbData;
+      let endpoint;
 
       if (item.type === "movie") {
-        tmdbData = await fetch(`${TMDB_BASE}/movie/${item.tmdb_id}?api_key=${TMDB_API_KEY}&language=it-IT`)
-          .then(r => r.json());
+        tmdbData = await fetch(`${TMDB_BASE}/movie/${item.tmdb_id}?api_key=${TMDB_API_KEY}&language=it-IT`).then(r => r.json());
+        endpoint = `/hls/movie/${item.tmdb_id}`;
       } else if (item.type === "tv") {
-        tmdbData = await fetch(`${TMDB_BASE}/tv/${item.tmdb_id}?api_key=${TMDB_API_KEY}&language=it-IT`)
-          .then(r => r.json());
+        tmdbData = await fetch(`${TMDB_BASE}/tv/${item.tmdb_id}?api_key=${TMDB_API_KEY}&language=it-IT`).then(r => r.json());
+        endpoint = `/hls/show/${item.tmdb_id}/1/1`;
       } else {
         continue;
       }
@@ -33,26 +39,22 @@ async function loadCatalog() {
         <h3>${title}</h3>
         <p>${overview}</p>
         <span class="vote">⭐ ${vote}</span>
-        <button onclick="watchContent(${item.tmdb_id}, '${item.type}')">Guarda ora</button>
+        <button onclick="watchContent('${endpoint}')">Guarda ora</button>
       `;
-      catalogContainer.appendChild(card);
+
+      sections[item.type].appendChild(card);
     } catch (err) {
       console.warn("Errore TMDB per", item.tmdb_id, err);
     }
   }
 }
 
-async function watchContent(tmdbId, type) {
-  const endpoint = type === "movie"
-    ? `/hls/movie/${tmdbId}`
-    : `/hls/show/${tmdbId}/1/1`;
-
+async function watchContent(endpoint) {
   try {
     const res = await fetch(`${BACKEND_URL}${endpoint}`);
     const data = await res.json();
     if (!data.url) return alert("Stream non disponibile");
-
-    loadVideo(data.url); // usa il tuo player.js
+    loadVideo(data.url);
   } catch (err) {
     console.error("Errore riproduzione:", err);
     alert("Errore nel caricamento del video");
