@@ -117,6 +117,11 @@
   <!-- Caroselli TMDB -->
   <div class="max-w-6xl mx-auto space-y-16">
 
+<section id="continue-section" class="max-w-6xl mx-auto mt-16 hidden">
+  <h2 class="text-2xl font-bold mb-4">📺 Continua a guardare</h2>
+  <div id="continue-watch" class="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth"></div>
+</section>
+
     <section>
       <h2 class="text-2xl font-bold mb-4">🎬 Film in tendenza</h2>
       <div class="carousel-wrapper">
@@ -263,6 +268,9 @@
         <p class="text-gray-400 text-xs">${year}</p>
         <p class="text-gray-400 text-xs">${genres}</p>
       `;
+
+div.onclick = () => openModal(item, type);
+
       return div;
     }
 
@@ -388,7 +396,61 @@
       // Inizializza caroselli
       initCarousels();
     });
+
+
+
+
+function openModal(item, type = 'movie') {
+  document.getElementById('modal').classList.remove('hidden');
+  document.getElementById('modal-title').textContent = type === 'tv' ? item.name : item.title;
+  document.getElementById('modal-overview').textContent = item.overview || 'Nessuna descrizione disponibile.';
+  document.getElementById('modal-poster').src = item.poster_path
+    ? POSTER + item.poster_path
+    : 'https://via.placeholder.com/500x750?text=No+Image';
+
+  // Salva l'elemento per uso nei bottoni
+  modalItem = item;
+  modalType = type;
+}
+
+document.getElementById('modal-close').onclick = () => {
+  document.getElementById('modal').classList.add('hidden');
+};
+
+document.getElementById('btn-back').onclick = () => {
+  document.getElementById('modal').classList.add('hidden');
+};
+
+document.getElementById('btn-watch').onclick = () => {
+  const box = document.getElementById('continue-watch');
+  box.appendChild(createCard(modalItem, modalType));
+  document.getElementById('continue-section').classList.remove('hidden');
+  document.getElementById('modal').classList.add('hidden');
+};
+
+document.getElementById('btn-info').onclick = () => {
+  alert('Funzione Info in arrivo!');
+};
+
+let modalItem = null;
+let modalType = 'movie';
+
   </script>
+
+<div id="modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
+  <div class="bg-gray-900 rounded-lg p-6 max-w-md w-full text-white relative">
+    <button id="modal-close" class="absolute top-2 right-2 text-gray-400 hover:text-white text-xl">&times;</button>
+    <img id="modal-poster" src="" alt="" class="w-full h-64 object-cover rounded mb-4">
+    <h2 id="modal-title" class="text-xl font-bold mb-2"></h2>
+    <p id="modal-overview" class="text-sm text-gray-300 mb-4"></p>
+    <div class="flex justify-between">
+      <button id="btn-watch" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">Guarda ora</button>
+      <button id="btn-info" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">Info</button>
+      <button id="btn-back" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">Indietro</button>
+    </div>
+  </div>
+</div>
+
 
 </body>
 </html>
