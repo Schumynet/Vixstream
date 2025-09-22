@@ -67,7 +67,14 @@ async function watch(tmdbId, type) {
       return;
     }
 
-    loadVideo(data.video[0].url); // definita in player.js
+    // Usa playMovie per sfruttare resume, titoli, ecc.
+    playMovie({
+      id: tmdbId,
+      media_type: type,
+      title: "Contenuto",
+      season_number: 1,
+      episode_number: 1
+    });
   } catch (err) {
     console.error("Errore nel caricamento del video:", err);
     showError(playerContainer, "Errore di rete o backend.");
