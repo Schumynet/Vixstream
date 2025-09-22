@@ -120,7 +120,6 @@
     const POSTER = 'https://image.tmdb.org/t/p/w500';
     let genreMap = {}, genreList = [];
 
-    // Crea card locandina
     function createCard(item, type) {
       const src = item.poster_path
         ? POSTER + item.poster_path
@@ -140,7 +139,6 @@
       return div;
     }
 
-    // Carica sezione TMDB
     async function loadSection(path, container, type) {
       const res = await fetch(`${TMDB}${path}?api_key=${API_KEY}&language=it-IT`);
       const data = await res.json();
@@ -149,7 +147,6 @@
       data.results.slice(0, 10).forEach(i => el.appendChild(createCard(i, type)));
     }
 
-    // Carica generi, dropdown e sezioni generi
     async function loadGenres() {
       const [mvRes, tvRes] = await Promise.all([
         fetch(`${TMDB}/genre/movie/list?api_key=${API_KEY}&language=it-IT`),
@@ -159,7 +156,6 @@
       genreList = [...mv.genres, ...tv.genres];
       genreList.forEach(g => genreMap[g.id] = g.name);
 
-      // popola dropdown generi
       const sel = document.getElementById('filter-genre');
       genreList.forEach(g => {
         const o = document.createElement('option');
@@ -167,7 +163,6 @@
         sel.appendChild(o);
       });
 
-      // sezioni primi 6 generi
       const container = document.getElementById('genre-sections');
       genreList.slice(0,6).forEach(g => {
         const s = document.createElement('section');
@@ -180,7 +175,6 @@
       });
     }
 
-    // Cerca con search/multi o discover
     async function doSearch() {
       const q = document.getElementById('filter-title').value.trim();
       const y = document.getElementById('filter-year').value.trim();
@@ -193,7 +187,6 @@
         const data = await res.json();
         results = data.results;
       } else {
-        // discover movie
         if (!t || t === 'movie') {
           let url = `${TMDB}/discover/movie?api_key=${API_KEY}&language=it-IT`;
           if (y) url += `&primary_release_year=${y}`;
@@ -201,7 +194,6 @@
           const d = await fetch(url).then(r => r.json());
           results.push(...d.results);
         }
-        // discover tv
         if (!t || t === 'tv') {
           let url = `${TMDB}/discover/tv?api_key=${API_KEY}&language=it-IT`;
           if (y) url += `&first_air_date_year=${y}`;
@@ -211,13 +203,11 @@
         }
       }
 
-      // filtro locale
       const filtered = results.filter(i => {
         if (!['movie','tv'].includes(i.media_type || t)) return false;
         return true;
       });
 
-      // mostra risultati
       const box = document.getElementById('results');
       box.innerHTML = '';
       filtered.slice(0, 20).forEach(i => {
@@ -227,25 +217,30 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      // carica iniziale
+      // Caricamenti iniziali
       loadGenres();
       loadSection('/trending/movie/week', 'trending', 'movie');
       loadSection('/tv/popular', 'tv', 'tv');
       loadSection('/movie/top_rated', 'top', 'movie');
       loadSection('/movie/upcoming', 'upcoming', 'movie');
 
-      // toggla dropdown
+      // Toggla dropdown
       const bar = document.getElementById('search-bar');
       const dd  = document.getElementById('search-dropdown');
+
       bar.addEventListener('click', e => {
         e.stopPropagation();
         dd.classList.toggle('hidden');
         document.getElementById('filter-title').focus();
       });
-      // chiudi cliccando fuori
+
+      // Impedisci la chiusura quando clicchi dentro la tendina
+      dd.addEventListener('click', e => e.stopPropagation());
+
+      // Chiudi cliccando fuori
       document.addEventListener('click', () => dd.classList.add('hidden'));
 
-      // bind ricerca
+      // Bind ricerca
       document.getElementById('btn-search').onclick = doSearch;
     });
   </script>
