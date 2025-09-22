@@ -3,17 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Test Sezioni TMDB</title>
+  <title>Test Sezioni + Ricerca TMDB</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background: #121212; color: #e5e5e5; }
     .poster { height: 300px; object-fit: cover; border-radius: 8px; }
+    select, input { background-color: #1f1f1f; color: white; border-radius: 6px; padding: 6px; }
+    label { font-weight: 500; margin-right: 8px; }
   </style>
 </head>
 <body class="p-6">
 
-  <h1 class="text-3xl font-bold mb-6 text-red-500">Test Sezioni da TMDB</h1>
+  <h1 class="text-3xl font-bold mb-6 text-red-500">🎯 Test Sezioni + Ricerca TMDB</h1>
 
+  <!-- Barra di ricerca -->
+  <div class="mb-10 space-y-4">
+    <div class="flex flex-wrap gap-4 items-center">
+      <label for="query">Titolo:</label>
+      <input type="text" id="query" placeholder="Es. Matrix" class="w-64"/>
+
+      <label for="year">Anno:</label>
+      <input type="number" id="year" placeholder="Es. 1999" class="w-24"/>
+
+      <label for="type">Tipologia:</label>
+      <select id="type">
+        <option value="">Tutti</option>
+        <option value="movie">Film</option>
+        <option value="tv">Serie TV</option>
+      </select>
+
+      <label for="genre">Genere:</label>
+      <select id="genre">
+        <option value="">Tutti</option>
+      </select>
+
+      <button id="search" class="bg-red-600 px-4 py-2 rounded hover:bg-red-700 font-semibold">
+        Cerca
+      </button>
+    </div>
+  </div>
+
+  <!-- Risultati ricerca -->
+  <section id="results-section" class="hidden">
+    <h2 class="text-xl font-semibold mb-4">🔍 Risultati ricerca</h2>
+    <div id="results" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
+  </section>
+
+  <!-- Sezioni TMDB -->
   <section>
     <h2 class="text-xl font-semibold mb-4">🎬 Film in tendenza</h2>
     <div id="trending" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
@@ -38,6 +74,7 @@
     const API_KEY = '1e8c9083f94c62dd66fb2105cd7b613b';
     const TMDB = 'https://api.themoviedb.org/3';
     const POSTER_PATH = 'https://image.tmdb.org/t/p/w500';
+    let genreMap = {};
 
     function createCard(item, type) {
       const src = item.poster_path
@@ -48,35 +85,85 @@
 
       const title = type === 'tv' ? item.name : item.title;
       const year = (type === 'tv' ? item.first_air_date : item.release_date || '').split('-')[0] || 'N/A';
+      const genres = (item.genre_ids || []).map(id => genreMap[id]).filter(Boolean).join(', ');
 
       const div = document.createElement('div');
       div.innerHTML = `
         <img src="${src}" alt="${title}" class="poster w-full mb-2"/>
         <h3 class="text-sm font-semibold truncate">${title}</h3>
         <p class="text-gray-400 text-xs">${year}</p>
+        <p class="text-gray-400 text-xs">${genres}</p>
       `;
       return div;
     }
 
     async function loadSection(endpoint, containerId, type) {
-      try {
-        const res = await fetch(`${TMDB}${endpoint}?api_key=${API_KEY}&language=it-IT`);
-        const data = await res.json();
-        const container = document.getElementById(containerId);
-        container.innerHTML = '';
-        data.results.slice(0, 10).forEach(item => {
-          container.appendChild(createCard(item, type));
-        });
-      } catch (err) {
-        console.error(`Errore nella sezione ${containerId}:`, err);
-      }
+      const res = await fetch(`${TMDB}${endpoint}?api_key=${API_KEY}&language=it-IT`);
+      const data = await res.json();
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      data.results.slice(0, 10).forEach(item => {
+        container.appendChild(createCard(item, type));
+      });
+    }
+
+    async function loadGenres() {
+      const [movieRes, tvRes] = await Promise.all([
+        fetch(`${TMDB}/genre/movie/list?api_key=${API_KEY}&language=it-IT`),
+        fetch(`${TMDB}/genre/tv/list?api_key=${API_KEY}&language=it-IT`)
+      ]);
+      const movieGenres = await movieRes.json();
+      const tvGenres = await tvRes.json();
+      [...movieGenres.genres, ...tvGenres.genres].forEach(g => {
+        genreMap[g.id] = g.name;
+      });
+
+      const genreSelect = document.getElementById('genre');
+      Object.entries(genreMap).forEach(([id, name]) => {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = name;
+        genreSelect.appendChild(opt);
+      });
+    }
+
+    async function search() {
+      const query = document.getElementById('query').value.trim();
+      const year = document.getElementById('year').value.trim();
+      const type = document.getElementById('type').value;
+      const genre = document.getElementById('genre').value;
+
+      if (!query) return;
+
+      let url = `${TMDB}/search/${type || 'multi'}?api_key=${API_KEY}&language=it-IT&query=${encodeURIComponent(query)}`;
+      if (year) url += `&year=${year}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      const container = document.getElementById('results');
+      container.innerHTML = '';
+
+      const filtered = data.results.filter(item => {
+        const matchType = type ? item.media_type === type : ['movie','tv'].includes(item.media_type);
+        const matchGenre = genre ? item.genre_ids?.includes(parseInt(genre)) : true;
+        return matchType && matchGenre;
+      });
+
+      filtered.forEach(item => {
+        container.appendChild(createCard(item, item.media_type));
+      });
+
+      document.getElementById('results-section').classList.remove('hidden');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      loadGenres();
       loadSection('/trending/movie/week', 'trending', 'movie');
       loadSection('/tv/popular', 'tv', 'tv');
       loadSection('/movie/top_rated', 'top', 'movie');
       loadSection('/movie/upcoming', 'upcoming', 'movie');
+
+      document.getElementById('search').onclick = search;
     });
   </script>
 
