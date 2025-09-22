@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Test Sezioni + Ricerca TMDB</title>
+  <title>Test Ricerca TMDB</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background: #121212; color: #e5e5e5; }
@@ -14,7 +14,7 @@
 </head>
 <body class="p-6">
 
-  <h1 class="text-3xl font-bold mb-6 text-red-500">🎯 Test Sezioni + Ricerca TMDB</h1>
+  <h1 class="text-3xl font-bold mb-6 text-red-500">🔎 Ricerca Avanzata TMDB</h1>
 
   <!-- Barra di ricerca -->
   <div class="mb-10 space-y-4">
@@ -43,31 +43,10 @@
     </div>
   </div>
 
-  <!-- Risultati ricerca -->
+  <!-- Risultati -->
   <section id="results-section" class="hidden">
-    <h2 class="text-xl font-semibold mb-4">🔍 Risultati ricerca</h2>
+    <h2 class="text-xl font-semibold mb-4">🎯 Risultati</h2>
     <div id="results" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
-  </section>
-
-  <!-- Sezioni TMDB -->
-  <section>
-    <h2 class="text-xl font-semibold mb-4">🎬 Film in tendenza</h2>
-    <div id="trending" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
-  </section>
-
-  <section>
-    <h2 class="text-xl font-semibold mb-4">📺 Serie TV popolari</h2>
-    <div id="tv" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
-  </section>
-
-  <section>
-    <h2 class="text-xl font-semibold mb-4">⭐ Film più votati</h2>
-    <div id="top" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
-  </section>
-
-  <section>
-    <h2 class="text-xl font-semibold mb-4">🎞️ Film al cinema</h2>
-    <div id="upcoming" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
   </section>
 
   <script>
@@ -95,16 +74,6 @@
         <p class="text-gray-400 text-xs">${genres}</p>
       `;
       return div;
-    }
-
-    async function loadSection(endpoint, containerId, type) {
-      const res = await fetch(`${TMDB}${endpoint}?api_key=${API_KEY}&language=it-IT`);
-      const data = await res.json();
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';
-      data.results.slice(0, 10).forEach(item => {
-        container.appendChild(createCard(item, type));
-      });
     }
 
     async function loadGenres() {
@@ -135,18 +104,18 @@
 
       if (!query) return;
 
-      let url = `${TMDB}/search/${type || 'multi'}?api_key=${API_KEY}&language=it-IT&query=${encodeURIComponent(query)}`;
-      if (year) url += `&year=${year}`;
-
+      let url = `${TMDB}/search/multi?api_key=${API_KEY}&language=it-IT&query=${encodeURIComponent(query)}`;
       const res = await fetch(url);
       const data = await res.json();
       const container = document.getElementById('results');
       container.innerHTML = '';
 
       const filtered = data.results.filter(item => {
-        const matchType = type ? item.media_type === type : ['movie','tv'].includes(item.media_type);
+        const isValidType = ['movie','tv'].includes(item.media_type);
+        const matchType = type ? item.media_type === type : true;
         const matchGenre = genre ? item.genre_ids?.includes(parseInt(genre)) : true;
-        return matchType && matchGenre;
+        const matchYear = year ? (item.release_date || item.first_air_date || '').startsWith(year) : true;
+        return isValidType && matchType && matchGenre && matchYear;
       });
 
       filtered.forEach(item => {
@@ -158,11 +127,6 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       loadGenres();
-      loadSection('/trending/movie/week', 'trending', 'movie');
-      loadSection('/tv/popular', 'tv', 'tv');
-      loadSection('/movie/top_rated', 'top', 'movie');
-      loadSection('/movie/upcoming', 'upcoming', 'movie');
-
       document.getElementById('search').onclick = search;
     });
   </script>
