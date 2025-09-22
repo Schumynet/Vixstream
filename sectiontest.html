@@ -298,6 +298,15 @@
       loadSection('/tv/popular', 'tv', 'tv');
       loadSection('/movie/top_rated', 'top', 'movie');
       loadSection('/movie/upcoming', 'upcoming', 'movie');
+      // custom genre carousels
+loadSection('/discover/movie?api_key=' + API_KEY + '&language=it-IT&with_genres=28', 'action', 'movie');        // Azione
+loadSection('/discover/movie?api_key=' + API_KEY + '&language=it-IT&with_genres=12', 'adventure', 'movie');   // Avventura
+loadSection('/discover/movie?api_key=' + API_KEY + '&language=it-IT&with_genres=16', 'animation', 'movie');   // Animazione
+loadSection('/discover/movie?api_key=' + API_KEY + '&language=it-IT&with_genres=80', 'crime', 'movie');       // Crime
+loadSection('/discover/movie?api_key=' + API_KEY + '&language=it-IT&with_genres=99', 'documentary', 'movie'); // Documentario
+
+
+
 
       // Gestione ricerca dropdown
       const bar = document.getElementById('search-bar');
