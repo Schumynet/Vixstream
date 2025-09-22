@@ -529,3 +529,48 @@ function playMovie(content, type = null) {
     window.lastPlayedTV = { id: content.id, season: content.season_number };
   }
 }
+
+
+// ─── Istanzia il player e rendi playContent globale ──────────────────────────
+const videoPlayerInstance = new VideoPlayer();
+
+window.playContent = function(content, type = 'movie') {
+  // Se è solo un ID numerico
+  if (typeof content === 'number') {
+    content = { id: content, media_type: type || 'movie', title: 'Film' };
+  }
+
+  // Se è una stringa tipo "123-1-2" per serie TV
+  if (typeof content === 'string' && content.includes('-')) {
+    const [tvId, season, episode] = content.split('-');
+    const epData = episodeMap.get(content);
+    if (!epData) {
+      console.error('Episodio sconosciuto');
+      return;
+    }
+    content = {
+      id: parseInt(tvId),
+      media_type: 'tv',
+      name: epData.tvData.name,
+      title: epData.tvData.name,
+      season_number: parseInt(season),
+      episode_number: parseInt(episode),
+      episode_data: epData.episodeData,
+      tv_data: epData.tvData
+    };
+  }
+
+  // Se è una serie TV ma mancano stagione o episodio
+  if (content.media_type === 'tv' && (!content.season_number || !content.episode_number)) {
+    showTVSeasons(content.id, 'tv');
+    return;
+  }
+
+  // Avvia il player
+  videoPlayerInstance.play(content);
+
+  // Salva ultimo episodio riprodotto
+  if (content.media_type === 'tv') {
+    window.lastPlayedTV = { id: content.id, season: content.season_number };
+  }
+};
