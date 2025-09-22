@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Test Ricerca TMDB</title>
+  <title>Test Ricerca + Generi TMDB</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background: #121212; color: #e5e5e5; }
@@ -14,7 +14,7 @@
 </head>
 <body class="p-6">
 
-  <h1 class="text-3xl font-bold mb-6 text-red-500">🔎 Ricerca Avanzata TMDB</h1>
+  <h1 class="text-3xl font-bold mb-6 text-red-500">🎯 Test Ricerca + Sezioni Generi TMDB</h1>
 
   <!-- Barra di ricerca -->
   <div class="mb-10 space-y-4">
@@ -43,17 +43,42 @@
     </div>
   </div>
 
-  <!-- Risultati -->
+  <!-- Risultati ricerca -->
   <section id="results-section" class="hidden">
-    <h2 class="text-xl font-semibold mb-4">🎯 Risultati</h2>
+    <h2 class="text-xl font-semibold mb-4">🔍 Risultati ricerca</h2>
     <div id="results" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
   </section>
+
+  <!-- Sezioni TMDB -->
+  <section>
+    <h2 class="text-xl font-semibold mb-4">🎬 Film in tendenza</h2>
+    <div id="trending" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">📺 Serie TV popolari</h2>
+    <div id="tv" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">⭐ Film più votati</h2>
+    <div id="top" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">🎞️ Film al cinema</h2>
+    <div id="upcoming" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
+  </section>
+
+  <!-- Sezioni per generi -->
+  <div id="genre-sections"></div>
 
   <script>
     const API_KEY = '1e8c9083f94c62dd66fb2105cd7b613b';
     const TMDB = 'https://api.themoviedb.org/3';
     const POSTER_PATH = 'https://image.tmdb.org/t/p/w500';
     let genreMap = {};
+    let genreList = [];
 
     function createCard(item, type) {
       const src = item.poster_path
@@ -76,6 +101,16 @@
       return div;
     }
 
+    async function loadSection(endpoint, containerId, type) {
+      const res = await fetch(`${TMDB}${endpoint}?api_key=${API_KEY}&language=it-IT`);
+      const data = await res.json();
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      data.results.slice(0, 10).forEach(item => {
+        container.appendChild(createCard(item, type));
+      });
+    }
+
     async function loadGenres() {
       const [movieRes, tvRes] = await Promise.all([
         fetch(`${TMDB}/genre/movie/list?api_key=${API_KEY}&language=it-IT`),
@@ -83,16 +118,39 @@
       ]);
       const movieGenres = await movieRes.json();
       const tvGenres = await tvRes.json();
-      [...movieGenres.genres, ...tvGenres.genres].forEach(g => {
+      genreList = [...movieGenres.genres, ...tvGenres.genres];
+      genreList.forEach(g => {
         genreMap[g.id] = g.name;
       });
 
       const genreSelect = document.getElementById('genre');
-      Object.entries(genreMap).forEach(([id, name]) => {
+      genreList.forEach(g => {
         const opt = document.createElement('option');
-        opt.value = id;
-        opt.textContent = name;
+        opt.value = g.id;
+        opt.textContent = g.name;
         genreSelect.appendChild(opt);
+      });
+
+      // Crea sezioni per generi
+      const container = document.getElementById('genre-sections');
+      genreList.slice(0, 6).forEach(g => {
+        const section = document.createElement('section');
+        section.innerHTML = `
+          <h2 class="text-xl font-semibold mb-4">🎭 ${g.name}</h2>
+          <div id="genre-${g.id}" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
+        `;
+        container.appendChild(section);
+        loadByGenre(g.id, `genre-${g.id}`);
+      });
+    }
+
+    async function loadByGenre(genreId, containerId) {
+      const res = await fetch(`${TMDB}/discover/movie?api_key=${API_KEY}&language=it-IT&with_genres=${genreId}`);
+      const data = await res.json();
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      data.results.slice(0, 10).forEach(item => {
+        container.appendChild(createCard(item, 'movie'));
       });
     }
 
@@ -104,7 +162,7 @@
 
       if (!query) return;
 
-      let url = `${TMDB}/search/multi?api_key=${API_KEY}&language=it-IT&query=${encodeURIComponent(query)}`;
+      const url = `${TMDB}/search/multi?api_key=${API_KEY}&language=it-IT&query=${encodeURIComponent(query)}`;
       const res = await fetch(url);
       const data = await res.json();
       const container = document.getElementById('results');
@@ -114,11 +172,13 @@
         const isValidType = ['movie','tv'].includes(item.media_type);
         const matchType = type ? item.media_type === type : true;
         const matchGenre = genre ? item.genre_ids?.includes(parseInt(genre)) : true;
-        const matchYear = year ? (item.release_date || item.first_air_date || '').startsWith(year) : true;
+        const rawDate = item.release_date || item.first_air_date || '';
+        const itemYear = rawDate.split('-')[0];
+        const matchYear = year ? itemYear === year : true;
         return isValidType && matchType && matchGenre && matchYear;
       });
 
-      filtered.forEach(item => {
+     filtered.forEach(item => {
         container.appendChild(createCard(item, item.media_type));
       });
 
@@ -127,6 +187,11 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       loadGenres();
+      loadSection('/trending/movie/week', 'trending', 'movie');
+      loadSection('/tv/popular', 'tv', 'tv');
+      loadSection('/movie/top_rated', 'top', 'movie');
+      loadSection('/movie/upcoming', 'upcoming', 'movie');
+
       document.getElementById('search').onclick = search;
     });
   </script>
