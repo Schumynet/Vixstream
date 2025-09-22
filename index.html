@@ -1,229 +1,227 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>VixStream</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background: #111;
-      color: #eee;
-    }
-    header, .filters, section {
-      padding: 20px;
-      max-width: 1200px;
-      margin: auto;
-    }
-    .hero {
-      position: relative;
-      height: 60vh;
-      overflow: hidden;
-      color: #fff;
-    }
-    .hero-backdrop {
-      position: absolute;
-      inset: 0;
-      background-size: cover;
-      background-position: center;
-      filter: brightness(0.5);
-    }
-    .hero-content {
-      position: relative;
-      z-index: 1;
-      top: 30%;
-      transform: translateY(-30%);
-      max-width: 600px;
-    }
-    .hero h1 {
-      font-size: 3rem;
-      margin: 0 0 10px;
-    }
-    .hero p {
-      font-size: 1.1rem;
-      line-height: 1.4;
-      max-height: 3.5em;
-      overflow: hidden;
-    }
-    .hero button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      background: #e50914;
-      border: none;
-      color: #fff;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-    .filters input, .filters select, .filters button {
-      padding: 8px;
-      margin-right: 10px;
-      margin-bottom: 10px;
-      background: #222;
-      border: 1px solid #333;
-      color: #eee;
-    }
-    .grid {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    }
-    .card {
-      background: #222;
-      border-radius: 4px;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    .card img {
+    .lock-scroll {
+      position: fixed;
       width: 100%;
-      display: block;
-    }
-    .card p {
-      padding: 8px;
-      margin: 0;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-    #videoPlayer {
-      width: 100%;
-      max-width: 800px;
-      display: block;
-      margin: 20px auto;
-      background: #000;
+      overflow: hidden;
     }
   </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-100">
 
-  <!-- Hero Section -->
-  <header class="hero" id="hero">
-    <div class="hero-backdrop" id="hero-backdrop"></div>
-    <div class="hero-content">
-      <h1 id="hero-title">Caricamento...</h1>
-      <p id="hero-overview"></p>
-      <button id="hero-play">Riproduci</button>
+  <!-- HEADER -->
+  <header class="flex items-center justify-between p-4">
+    <h1 class="text-2xl font-bold">VixStream</h1>
+    <div class="hidden md:flex items-center space-x-2">
+      <input id="search-input" 
+             class="px-3 py-1 bg-gray-800 rounded focus:outline-none" 
+             type="text" placeholder="Cerca film o serie...">
+      <button id="search-button" 
+              class="px-3 py-1 bg-indigo-600 rounded hover:bg-indigo-500">
+        <i class="fas fa-search"></i>
+      </button>
+    </div>
+    <div id="mobile-search-toggle" class="md:hidden p-2 cursor-pointer">
+      <i class="fas fa-search"></i>
+    </div>
+    <div id="mobile-search-box" 
+         class="absolute top-16 left-0 w-full bg-gray-800 p-4 space-x-2 transform scale-95 opacity-0 transition-all duration-200 md:hidden">
+      <input id="mobile-search-input" 
+             class="w-4/5 px-3 py-1 bg-gray-700 rounded focus:outline-none" 
+             type="text" placeholder="Cerca...">
+      <button id="mobile-search-button" 
+              class="w-1/5 px-3 py-1 bg-indigo-600 rounded hover:bg-indigo-500">
+        <i class="fas fa-arrow-right"></i>
+      </button>
     </div>
   </header>
 
-  <!-- Search & Filters -->
-  <div class="filters">
-    <input type="text" id="filter-title" placeholder="Titolo" />
-    <input type="number" id="filter-year" placeholder="Anno" min="1900" max="2100" />
-    <select id="filter-type">
-      <option value="all">Tutti i tipi</option>
-      <option value="movie">Film</option>
-      <option value="tv">Serie TV</option>
-    </select>
-    <select id="filter-genre">
-      <option value="all">Tutti i generi</option>
-    </select>
-    <button id="filter-button">Cerca</button>
-    <div id="searchResults" class="grid"></div>
+  <!-- HERO -->
+  <section class="relative h-[60vh] overflow-hidden">
+    <div id="hero-backdrop" 
+         class="absolute inset-0 bg-cover bg-center transition-opacity duration-500"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-gray-900"></div>
+    <div class="relative z-10 p-8 max-w-2xl">
+      <h2 id="hero-title" class="text-4xl font-bold mb-2">Caricamento...</h2>
+      <p id="hero-overview" class="line-clamp-3 mb-4"></p>
+      <button id="hero-play" 
+              class="px-4 py-2 bg-red-600 rounded hover:bg-red-500">
+        <i class="fas fa-play mr-2"></i>Riproduci
+      </button>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <main class="p-4 space-y-8">
+
+    <section>
+      <h3 class="text-2xl mb-2">In Tendenza</h3>
+      <div id="trendingMovies" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+    </section>
+
+    <section>
+      <h3 class="text-2xl mb-2">I Più Votati</h3>
+      <div id="topRatedMovies" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+    </section>
+
+    <section>
+      <h3 class="text-2xl mb-2">Prossime Uscite</h3>
+      <div id="upcomingMovies" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+    </section>
+
+    <section>
+      <h3 class="text-2xl mb-2">Serie TV Popolari</h3>
+      <div id="popularTv" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+    </section>
+
+    <!-- SEARCH RESULTS OVERLAY -->
+    <section id="search-results-section" 
+             class="fixed inset-0 bg-black bg-opacity-75 hidden justify-center items-start pt-20">
+      <div id="search-results" 
+           class="bg-gray-800 rounded p-6 max-w-3xl w-full space-y-4 overflow-auto max-h-[80vh]">
+        <button onclick="clearSearch()" 
+                class="text-gray-400 hover:text-white mb-4">
+          <i class="fas fa-times"></i> Chiudi
+        </button>
+        <div id="search-results-container"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- SEASON/EPISODE SELECTOR -->
+  <div id="seasonEpisodeSelector" 
+       class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center p-4 transition-opacity scale-95 opacity-0">
+    <div class="bg-gray-800 rounded-lg overflow-hidden w-full max-w-xl">
+      <div class="p-4 border-b border-gray-700">
+        <h2 id="selectorTitle" class="text-xl font-semibold">Seleziona Stagione</h2>
+      </div>
+      <div id="selectorContent" class="p-4 max-h-[60vh] overflow-auto"></div>
+      <button onclick="closeSeasonEpisodeSelector()"
+              class="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <i class="fas fa-times fa-lg"></i>
+      </button>
+    </div>
   </div>
 
-  <!-- Sections -->
-  <section>
-    <h2>In Tendenza</h2>
-    <div id="trendingMovies" class="grid"></div>
-  </section>
+  <!-- MOVIE/TV DETAIL MODAL -->
+  <div id="movie-modal" 
+       class="fixed inset-0 bg-black bg-opacity-75 hidden justify-center items-center p-4 overflow-auto">
+    <div id="movie-modal-content" 
+         class="bg-gray-800 rounded-lg overflow-hidden w-full max-w-3xl transform scale-95 opacity-0 transition-all duration-300">
+      <div class="flex justify-between items-center p-4 border-b border-gray-700">
+        <h2 id="modal-title" class="text-2xl font-semibold"></h2>
+        <button id="close-modal" class="text-gray-400 hover:text-white">
+          <i class="fas fa-times fa-lg"></i>
+        </button>
+      </div>
+      <div class="p-4 space-y-4">
+        <div class="flex flex-col md:flex-row md:space-x-4">
+          <img id="modal-poster" class="w-32 h-48 rounded object-cover mb-4 md:mb-0" src="" alt="Poster">
+          <div class="space-y-2">
+            <p><strong>Anno:</strong> <span id="modal-year"></span></p>
+            <p><strong>Durata:</strong> <span id="modal-runtime"></span></p>
+            <p><strong>Voto:</strong> <span id="modal-rating"></span></p>
+            <div id="modal-genres" class="flex flex-wrap gap-2"></div>
+            <div id="modal-cast" class="flex flex-wrap gap-2"></div>
+            <p id="modal-overview" class="mt-2"></p>
+          </div>
+        </div>
+        <button id="modal-play-button" 
+                class="w-full px-4 py-2 bg-red-600 rounded hover:bg-red-500">
+          <i class="fas fa-play mr-2"></i>Riproduci
+        </button>
+      </div>
+    </div>
+  </div>
 
-  <section>
-    <h2>I Più Votati</h2>
-    <div id="topRatedMovies" class="grid"></div>
-  </section>
+  <!-- PLAYER MODAL -->
+  <div id="player-modal" 
+       class="fixed inset-0 bg-black bg-opacity-90 hidden justify-center items-center p-4">
+    <div class="relative w-full max-w-3xl">
+      <button id="close-player" 
+              class="absolute top-2 right-2 text-white text-2xl z-10">
+        <i class="fas fa-times"></i>
+      </button>
+      <div id="videoContainer" class="w-full aspect-video bg-black">
+        <video id="videoPlayer" class="w-full h-full" controls></video>
+      </div>
+    </div>
+  </div>
 
-  <section>
-    <h2>Prossime Uscite</h2>
-    <div id="upcomingMovies" class="grid"></div>
-  </section>
-
-  <section>
-    <h2>Serie TV Popolari</h2>
-    <div id="popularTv" class="grid"></div>
-  </section>
-
-  <!-- Video Player -->
-  <video id="videoPlayer" controls></video>
-
+  <!-- HLS.js -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script>
     const PROXY_URL = 'https://vixstreamproxy.onrender.com/';
-    let available = [];
-    let movieGenres = [];
-    let tvGenres = [];
-    let heroContent = null;
+    let availableContent = [];
+    const episodeMap = new Map();
+    let heroItem = null;
+    let scrollPosition = 0;
 
-    // load available TMDB IDs
-    async function loadAvailable() {
+    // Scroll lock
+    function lockScroll() {
+      scrollPosition = window.pageYOffset;
+      document.body.classList.add('lock-scroll');
+      document.body.style.top = `-${scrollPosition}px`;
+    }
+    function unlockScroll() {
+      document.body.classList.remove('lock-scroll');
+      document.body.style.top = '';
+      window.scrollTo(0, scrollPosition);
+    }
+
+    // Load available catalog
+    async function loadAvailableContent() {
       try {
         const res = await fetch(`${PROXY_URL}home/available`);
-        available = await res.json();
+        availableContent = await res.json();
       } catch {
-        available = [];
+        availableContent = [];
       }
     }
-    // load genres lists
-    async function loadGenres() {
-      try {
-        const [mv, tv] = await Promise.all([
-          fetch(`${PROXY_URL}genre/movie/list`).then(r=>r.json()),
-          fetch(`${PROXY_URL}genre/tv/list`).then(r=>r.json())
-        ]);
-        movieGenres = mv.genres;
-        tvGenres = tv.genres;
-      } catch {
-        movieGenres = [];
-        tvGenres = [];
-      }
-    }
-    // populate genre select based on type
-    function populateGenres() {
-      const select = document.getElementById('filter-genre');
-      const type = document.getElementById('filter-type').value;
-      select.innerHTML = '<option value="all">Tutti i generi</option>';
-      let list = [];
-      if (type === 'movie') list = movieGenres;
-      else if (type === 'tv') list = tvGenres;
-      else list = [...movieGenres, ...tvGenres];
-      // remove duplicates by id
-      const seen = new Set();
-      list.forEach(g => {
-        if (!seen.has(g.id)) {
-          seen.add(g.id);
-          const opt = document.createElement('option');
-          opt.value = g.id;
-          opt.textContent = g.name;
-          select.appendChild(opt);
-        }
+
+    // Helper: create a card
+    function createMovieCard(item, type) {
+      const card = document.createElement('div');
+      card.className = 'cursor-pointer rounded overflow-hidden bg-gray-800';
+      card.innerHTML = `
+        <img src="https://image.tmdb.org/t/p/w300${item.poster_path}"
+             alt="${item.title||item.name}" class="w-full h-48 object-cover"/>
+        <div class="p-2">
+          <h4 class="font-semibold truncate">${item.title||item.name}</h4>
+          <p class="text-sm text-gray-400">${type==='movie'
+            ? (item.release_date||'').split('-')[0]
+            : (item.first_air_date||'').split('-')[0]
+          }</p>
+        </div>`;
+      card.addEventListener('click', () => {
+        if (type==='tv') showTVSeasons(item.id);
+        else showMovieDetails({...item, media_type:'movie'});
       });
+      return card;
     }
 
-    // create a card element
-    function createCard(item, type) {
-      const div = document.createElement('div');
-      div.className = 'card';
-      div.innerHTML = `
-        <img src="https://image.tmdb.org/t/p/w300${item.poster_path}" alt="${item.title||item.name}" />
-        <p>${item.title||item.name}</p>
-      `;
-      div.onclick = () => play(item.id, type);
-      return div;
-    }
-    // filter by available
-    function filterAvailable(list, type) {
-      return list.filter(i => available.some(a => a.tmdb_id === i.id && a.type === type));
-    }
-
-    // fetch & render sections
+    // Fetch & render sections
     async function getTrendingMovies() {
       const el = document.getElementById('trendingMovies');
       el.innerHTML = '';
       try {
         const { results } = await (await fetch(`${PROXY_URL}trending/movie/week`)).json();
-        filterAvailable(results, 'movie').slice(0,12)
-          .forEach(m => el.appendChild(createCard(m,'movie')));
+        results
+          .filter(m => availableContent.some(a => a.tmdb_id===m.id && a.type==='movie'))
+          .slice(0, 10)
+          .forEach(m => el.appendChild(createMovieCard(m,'movie')));
       } catch {
-        el.innerHTML = '<p>Errore caricamento</p>';
+        el.innerHTML = '<p class="text-gray-400">Errore caricamento</p>';
       }
     }
     async function getTopRatedMovies() {
@@ -231,10 +229,12 @@
       el.innerHTML = '';
       try {
         const { results } = await (await fetch(`${PROXY_URL}movie/top_rated`)).json();
-        filterAvailable(results, 'movie').slice(0,12)
-          .forEach(m => el.appendChild(createCard(m,'movie')));
+        results
+          .filter(m => availableContent.some(a => a.tmdb_id===m.id && a.type==='movie'))
+          .slice(0, 10)
+          .forEach(m => el.appendChild(createMovieCard(m,'movie')));
       } catch {
-        el.innerHTML = '<p>Errore caricamento</p>';
+        el.innerHTML = '<p class="text-gray-400">Errore caricamento</p>';
       }
     }
     async function getUpcomingMovies() {
@@ -242,10 +242,12 @@
       el.innerHTML = '';
       try {
         const { results } = await (await fetch(`${PROXY_URL}movie/upcoming`)).json();
-        filterAvailable(results, 'movie').slice(0,12)
-          .forEach(m => el.appendChild(createCard(m,'movie')));
+        results
+          .filter(m => availableContent.some(a => a.tmdb_id===m.id && a.type==='movie'))
+          .slice(0, 10)
+          .forEach(m => el.appendChild(createMovieCard(m,'movie')));
       } catch {
-        el.innerHTML = '<p>Errore caricamento</p>';
+        el.innerHTML = '<p class="text-gray-400">Errore caricamento</p>';
       }
     }
     async function getPopularTv() {
@@ -253,70 +255,146 @@
       el.innerHTML = '';
       try {
         const { results } = await (await fetch(`${PROXY_URL}tv/popular`)).json();
-        filterAvailable(results, 'tv').slice(0,12)
-          .forEach(tv => el.appendChild(createCard(tv,'tv')));
+        results
+          .filter(tv => availableContent.some(a => a.tmdb_id===tv.id && a.type==='tv'))
+          .slice(0, 10)
+          .forEach(tv => el.appendChild(createMovieCard(tv,'tv')));
       } catch {
-        el.innerHTML = '<p>Errore caricamento</p>';
+        el.innerHTML = '<p class="text-gray-400">Errore caricamento</p>';
       }
     }
 
-    // hero: pick random from trending or popular
-    async function loadHero() {
+    // Hero: random pick
+    async function getRandomHeroContent() {
       try {
         const [mvRes, tvRes] = await Promise.all([
           fetch(`${PROXY_URL}movie/popular`),
           fetch(`${PROXY_URL}tv/popular`)
         ]);
-        const movies = (await mvRes.json()).results.map(i=>({...i,media_type:'movie'}));
-        const tvs    = (await tvRes.json()).results.map(i=>({...i,media_type:'tv'}));
-        const pool   = [...movies,...tvs].filter(i => available.some(a=>a.tmdb_id===i.id&&a.type===i.media_type));
+        const movies = (await mvRes.json()).results.map(i => ({...i, media_type:'movie'}));
+        const tvs    = (await tvRes.json()).results.map(i => ({...i, media_type:'tv'}));
+        const pool   = [...movies, ...tvs]
+                       .filter(i => availableContent.some(a=>a.tmdb_id===i.id && a.type===i.media_type));
         if (!pool.length) return;
-        const pick   = pool[Math.floor(Math.random()*pool.length)];
-        heroContent  = pick;
-        document.getElementById('hero-backdrop').style.backgroundImage =
-          `url(https://image.tmdb.org/t/p/original${pick.backdrop_path})`;
+        const pick  = pool[Math.floor(Math.random()*pool.length)];
+        heroItem = pick;
+        const backdrop = `url(https://image.tmdb.org/t/p/original${pick.backdrop_path})`;
+        document.getElementById('hero-backdrop').style.backgroundImage = backdrop;
         document.getElementById('hero-title').textContent = pick.title||pick.name;
         document.getElementById('hero-overview').textContent = pick.overview||'';
       } catch {}
     }
 
-    // search/filter function
-    async function filterMedia() {
-      const title = document.getElementById('filter-title').value.trim();
-      const year  = document.getElementById('filter-year').value;
-      const type  = document.getElementById('filter-type').value;
-      const genre = document.getElementById('filter-genre').value;
-      const el    = document.getElementById('searchResults');
-      el.innerHTML = '';
-      if (!title && !year && type==='all' && genre==='all') return;
-      try {
-        const { results } = await (await fetch(`${PROXY_URL}search?q=${encodeURIComponent(title||'a')}`)).json();
-        let list = results.filter(i => ['movie','tv'].includes(i.media_type));
-        if (type!=='all') list = list.filter(i => i.media_type===type);
-        if (year) {
-          list = list.filter(i => {
-            const field = i.release_date || i.first_air_date || '';
-            return field.startsWith(year);
-          });
-        }
-        if (genre!=='all') {
-          const gid = parseInt(genre);
-          list = list.filter(i => Array.isArray(i.genre_ids) && i.genre_ids.includes(gid));
-        }
-        list.filter(i => available.some(a=>a.tmdb_id===i.id&&a.type===i.media_type))
-            .slice(0,20)
-            .forEach(i => el.appendChild(createCard(i,i.media_type)));
-      } catch {
-        el.innerHTML = '<p>Errore nella ricerca</p>';
-      }
+    // Search
+    async function searchMedia(query) {
+      const q = query || document.getElementById('search-input').value 
+                      || document.getElementById('mobile-search-input').value;
+      if (!q.trim()) return;
+      const res = await fetch(`${PROXY_URL}search?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      const list = data.results
+        .filter(i => ['movie','tv'].includes(i.media_type))
+        .filter(i => availableContent.some(a=>a.tmdb_id===i.id && a.type===i.media_type));
+      if (!list.length) return alert('Nessun risultato.');
+      showSearchResults(list);
+    }
+    function showSearchResults(arr) {
+      const sec = document.getElementById('search-results-section');
+      const cont = document.getElementById('search-results-container');
+      lockScroll();
+      sec.classList.remove('hidden');
+      cont.innerHTML = arr.map(i => `
+        <div class="p-4 mb-2 bg-gray-700 rounded">
+          <h4 class="font-semibold">${i.title||i.name}</h4>
+          <p class="text-sm line-clamp-2">${i.overview||''}</p>
+          <button class="mt-2 px-3 py-1 bg-red-600 rounded"
+                  onclick="handleResultClick(${i.id},'${i.media_type}',${JSON.stringify(i)})">
+            Riproduci
+          </button>
+        </div>
+      `).join('');
+    }
+    function clearSearch() {
+      document.getElementById('search-results-section').classList.add('hidden');
+      unlockScroll();
     }
 
-    // play HLS
-    function play(id, type) {
+    async function handleResultClick(id, type, itemData) {
+      clearSearch();
+      if (type==='tv') showTVSeasons(id);
+      else playContent({ id, media_type:'movie' });
+    }
+
+    // Seasons & episodes
+    async function showTVSeasons(tvId) {
+      const modal = document.getElementById('seasonEpisodeSelector');
+      const title = document.getElementById('selectorTitle');
+      const body  = document.getElementById('selectorContent');
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        modal.classList.replace('scale-95','scale-100');
+        modal.classList.replace('opacity-0','opacity-100');
+      });
+      title.textContent = 'Caricamento stagioni...';
+      body.innerHTML = `<p class="text-center py-8"><i class="fas fa-spinner fa-spin"></i></p>`;
+      try {
+        const data = await (await fetch(`${PROXY_URL}tv/${tvId}`)).json();
+        const seasons = data.seasons.filter(s=>s.episode_count>0);
+        title.textContent = 'Seleziona Stagione';
+        body.innerHTML = seasons.map(s => `
+          <div class="cursor-pointer p-4 bg-gray-700 mb-2 rounded"
+               onclick="showEpisodes(${tvId},${s.season_number})">
+            Stagione ${s.season_number} — ${s.episode_count} episodi
+          </div>
+        `).join('');
+      } catch {
+        body.innerHTML = '<p class="text-red-500">Errore</p>';
+      }
+    }
+    async function showEpisodes(tvId, season) {
+      const title = document.getElementById('selectorTitle');
+      const body  = document.getElementById('selectorContent');
+      title.textContent = `Episodi S${season}`;
+      body.innerHTML = `<p class="text-center py-8"><i class="fas fa-spinner fa-spin"></i></p>`;
+      try {
+        const eps = (await (await fetch(`${PROXY_URL}tv/${tvId}/season/${season}`)).json()).episodes;
+        title.textContent = `Stagione ${season}`;
+        body.innerHTML = eps.map(ep => {
+          const key = `${tvId}-${season}-${ep.episode_number}`;
+          episodeMap.set(key, { tvId, season, epNum: ep.episode_number });
+          return `
+            <div class="cursor-pointer p-4 bg-gray-700 mb-2 rounded"
+                 onclick="playTVEpisode('${key}')">
+              ${ep.episode_number}. ${ep.name||'Senza titolo'}
+            </div>
+          `;
+        }).join('');
+      } catch {
+        body.innerHTML = '<p class="text-red-500">Errore</p>';
+      }
+    }
+    function closeSeasonEpisodeSelector() {
+      const modal = document.getElementById('seasonEpisodeSelector');
+      modal.classList.replace('opacity-100','opacity-0');
+      modal.classList.replace('scale-100','scale-95');
+      setTimeout(()=> modal.classList.add('hidden'), 300);
+    }
+    function playTVEpisode(key) {
+      const { tvId, season, epNum } = episodeMap.get(key);
+      playContent({ id: tvId, media_type:'tv', season, episode: epNum });
+      closeSeasonEpisodeSelector();
+    }
+
+    // Play movie or episode
+    function playContent({ id, media_type, season, episode }) {
+      const playerModal = document.getElementById('player-modal');
       const video = document.getElementById('videoPlayer');
-      const url = type==='movie'
-        ? `${PROXY_URL}hls/movie/${id}`
-        : `${PROXY_URL}hls/show/${id}/1/1`;
+      let url;
+      if (media_type==='movie') {
+        url = `${PROXY_URL}hls/movie/${id}`;
+      } else {
+        url = `${PROXY_URL}hls/show/${id}/${season}/${episode}`;
+      }
       if (Hls.isSupported()) {
         const hls = new Hls();
         hls.loadSource(url);
@@ -324,25 +402,103 @@
       } else {
         video.src = url;
       }
+      lockScroll();
+      playerModal.classList.remove('hidden');
       video.play();
+      video.ontimeupdate = () => saveProgress({ id, media_type, season, episode }, video);
+      video.onended = closePlayer;
     }
-    // hero play button
-    document.getElementById('hero-play').onclick = () => {
-      if (heroContent) play(heroContent.id, heroContent.media_type);
-    };
+    function closePlayer() {
+      const pm = document.getElementById('player-modal');
+      const v  = document.getElementById('videoPlayer');
+      v.pause(); v.src=''; pm.classList.add('hidden');
+      unlockScroll();
+    }
 
-    // init
+    // Save progress
+    async function saveProgress(detail, video) {
+      try {
+        await fetch(`${PROXY_URL}progress/save`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ip: 'demo',
+            tmdbId: detail.id,
+            contentType: detail.media_type,
+            season: detail.season,
+            episode: detail.episode,
+            currentTime: video.currentTime,
+            duration: video.duration
+          })
+        });
+      } catch {}
+    }
+
+    // INIT
     document.addEventListener('DOMContentLoaded', async () => {
-      await Promise.all([loadAvailable(), loadGenres()]);
-      populateGenres();
-      await loadHero();
+      await loadAvailableContent();
+      await getRandomHeroContent();
       getTrendingMovies();
       getTopRatedMovies();
       getUpcomingMovies();
       getPopularTv();
-      document.getElementById('filter-type').onchange = populateGenres;
-      document.getElementById('filter-button').onclick = filterMedia;
+
+      document.getElementById('search-button').onclick = () => searchMedia();
+      document.getElementById('search-input')
+              .addEventListener('keydown', e => e.key==='Enter' && searchMedia());
+      document.getElementById('mobile-search-button').onclick = () => {
+        searchMedia();
+        document.getElementById('mobile-search-box').classList.remove('active');
+      };
+      document.getElementById('mobile-search-input')
+              .addEventListener('keydown', e => e.key==='Enter' && searchMedia());
+
+      // mobile search toggle
+      const toggle = document.getElementById('mobile-search-toggle');
+      const box    = document.getElementById('mobile-search-box');
+      toggle.onclick = e => {
+        e.stopPropagation();
+        box.classList.toggle('active');
+        if (box.classList.contains('active')) {
+          setTimeout(()=>document.getElementById('mobile-search-input').focus(), 50);
+        }
+      };
+      document.addEventListener('click', e => {
+        if (!box.contains(e.target) && !toggle.contains(e.target)) {
+          box.classList.remove('active');
+        }
+      });
+
+      // close movie modal
+      document.getElementById('close-modal').onclick = () => {
+        const m = document.getElementById('movie-modal-content');
+        m.classList.replace('opacity-100','opacity-0');
+        m.classList.replace('scale-100','scale-95');
+        setTimeout(()=> document.getElementById('movie-modal').classList.add('hidden'), 300);
+      };
+      window.addEventListener('keydown', e => {
+        if (e.key==='Escape') {
+          closeSeasonEpisodeSelector();
+          closePlayer();
+          const mm = document.getElementById('movie-modal');
+          if (!mm.classList.contains('hidden')) {
+            const mc = document.getElementById('movie-modal-content');
+            mc.classList.replace('opacity-100','opacity-0');
+            mc.classList.replace('scale-100','scale-95');
+            setTimeout(()=> mm.classList.add('hidden'), 300);
+          }
+        }
+      });
+      window.addEventListener('click', e => {
+        if (e.target === document.getElementById('player-modal')) closePlayer();
+      });
+
+      // register service worker (optional)
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
+      }
     });
   </script>
+
 </body>
 </html>
