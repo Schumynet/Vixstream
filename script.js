@@ -63,7 +63,7 @@ async function watch(tmdbId, type) {
 
   const endpoint = type === "movie"
     ? `/hls/movie/${tmdbId}`
-    : `/hls/show/${tmdbId}/1/1`; // default episodio 1
+    : `/hls/show/${tmdbId}/1/1`;
 
   try {
     const res = await fetch(`${BACKEND_URL}${endpoint}`);
