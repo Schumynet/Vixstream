@@ -1,137 +1,511 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>VixStream</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    integrity="sha512-papm5Zz+eTV/YO2L0rZD+F3ZR9+Oy3QqFx4DxY+ZPz0Efe622cKZvnpFmGdh8QF0Zyb4/ZkzF3M1hM+BrfM1Aw=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    /* Scroll lock when modals open */
+    .lock-scroll {
+      position: fixed;
+      width: 100%;
+      overflow: hidden;
+    }
+  </style>
 </head>
-<body>
-  <!-- frecce verticali per saltare tra i caroselli -->
-  <button id="scroll-up" class="page-arrow up">
-    <i class="fas fa-chevron-up"></i>
-  </button>
-  <button id="scroll-down" class="page-arrow down">
-    <i class="fas fa-chevron-down"></i>
-  </button>
+<body class="bg-gray-900 text-gray-100">
 
-  <!-- HEADER -->
-  <header class="site-header">
-    <div class="logo">VixStream</div>
-    <nav class="genre-nav">
-      <ul>
-        <li><a href="#" data-genre="28">Action</a></li>
-        <li><a href="#" data-genre="35">Comedy</a></li>
-        <li><a href="#" data-genre="18">Drama</a></li>
-        <li><a href="#" data-genre="27">Horror</a></li>
-        <li><a href="#" data-genre="10749">Romance</a></li>
-        <li><a href="#" data-genre="878">Sci-Fi</a></li>
-      </ul>
-    </nav>
+  <!-- Header with Search -->
+  <header class="flex items-center justify-between p-4">
+    <h1 class="text-2xl font-bold">VixStream</h1>
+    <div class="hidden md:flex items-center space-x-2">
+      <input id="search-input" type="text" placeholder="Cerca film o serie..." 
+             class="px-3 py-1 rounded bg-gray-800 focus:outline-none"/>
+      <button id="search-button" class="px-3 py-1 bg-indigo-600 rounded hover:bg-indigo-500">
+        <i class="fas fa-search"></i>
+      </button>
+    </div>
+    <!-- Mobile search toggle -->
+    <div id="mobile-search-toggle" class="md:hidden p-2 cursor-pointer">
+      <i class="fas fa-search"></i>
+    </div>
+    <div id="mobile-search-box" 
+         class="absolute top-16 left-0 w-full bg-gray-800 p-4 space-x-2 transform scale-95 opacity-0 transition-all duration-200 md:hidden">
+      <input id="mobile-search-input" type="text" placeholder="Cerca..." 
+             class="w-4/5 px-3 py-1 rounded bg-gray-700 focus:outline-none"/>
+      <button id="mobile-search-button" class="w-1/5 px-3 py-1 bg-indigo-600 rounded hover:bg-indigo-500">
+        <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
   </header>
 
-  <!-- HERO SECTION -->
-  <section id="hero" class="hero-section">
-    <div id="hero-bg" class="hero-background"></div>
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <h2 id="hero-title">Titolo in evidenza</h2>
-      <p id="hero-description">Descrizione breve dell'elemento in evidenza...</p>
-      <div class="hero-meta">
-        <span id="hero-rating">⭐ 6.4</span>
-        <span id="hero-year">2025</span>
-        <span id="hero-duration">1h 41min</span>
-      </div>
-      <div class="hero-buttons">
-        <button id="hero-play" class="btn primary">
-          <i class="fas fa-play"></i> Guarda ora
+  <!-- Hero Section -->
+  <section class="relative h-[60vh] overflow-hidden">
+    <div id="hero-backdrop" class="absolute inset-0 bg-cover bg-center transition-opacity duration-500"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-gray-900 hero-gradient"></div>
+    <div class="relative z-10 p-8 max-w-2xl">
+      <h2 id="hero-title" class="text-4xl font-bold mb-2"></h2>
+      <p id="hero-overview" class="line-clamp-3 mb-4"></p>
+      <div class="space-x-2">
+        <button id="play-button" class="px-4 py-2 bg-red-600 rounded hover:bg-red-500">
+          <i class="fas fa-play mr-2"></i>Riproduci
         </button>
-        <button id="hero-info" class="btn secondary">
-          <i class="fas fa-info-circle"></i> Informazioni
+        <button id="more-info-button" class="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
+          <i class="fas fa-info-circle mr-2"></i>Info
         </button>
       </div>
     </div>
   </section>
 
-  <!-- CAROUSEL: Trending Movies -->
-  <section class="section carousel-section">
-    <h2>Film in tendenza</h2>
-    <div class="carousel">
-      <button class="carousel-arrow prev"><i class="fas fa-chevron-left"></i></button>
-      <div class="carousel-track" id="trending-movies">
-        <!-- qui aggiungi dinamicamente le card -->
+  <!-- Main Content -->
+  <main class="p-4 space-y-8">
+
+    <section>
+      <h3 class="text-2xl mb-2">In Tendenza</h3>
+      <div id="trendingMovies" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+    </section>
+
+    <section>
+      <h3 class="text-2xl mb-2">I Più Votati</h3>
+      <div id="topRatedMovies" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+    </section>
+
+    <section>
+      <h3 class="text-2xl mb-2">Prossime Uscite</h3>
+      <div id="upcomingMovies" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+    </section>
+
+    <section>
+      <h3 class="text-2xl mb-2">Serie TV Popolari</h3>
+      <div id="popularTv" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+    </section>
+
+    <!-- Search Results Modal -->
+    <section id="search-results-section" class="fixed inset-0 bg-black bg-opacity-75 hidden justify-center items-start pt-20">
+      <div id="search-results" class="bg-gray-800 rounded p-6 max-w-3xl w-full space-y-4 overflow-auto max-h-[80vh]">
+        <button onclick="clearSearch()" class="text-gray-400 hover:text-white mb-4">
+          <i class="fas fa-times"></i> Chiudi
+        </button>
+        <div id="search-results-container"></div>
       </div>
-      <button class="carousel-arrow next"><i class="fas fa-chevron-right"></i></button>
+    </section>
+
+  </main>
+
+  <!-- Season/Episode Selector Modal -->
+  <div id="seasonEpisodeSelector" 
+       class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center p-4 transition-opacity scale-95 opacity-0">
+    <div class="bg-gray-800 rounded-lg overflow-hidden w-full max-w-xl">
+      <div class="p-4 border-b border-gray-700">
+        <h2 id="selectorTitle" class="text-xl font-semibold">Seleziona Stagione</h2>
+      </div>
+      <div id="selectorContent" class="p-4 max-h-[60vh] overflow-auto"></div>
+      <button onclick="closeSeasonEpisodeSelector()"
+              class="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <i class="fas fa-times fa-lg"></i>
+      </button>
     </div>
-  </section>
+  </div>
 
-  <!-- CAROUSEL: Sezioni per genere -->
-  <section id="genre-sections">
-    <!-- 
-      JavaScript dovrà popolare così:
-      <div class="section carousel-section" data-genre="28">
-        <h2>Action</h2>
-        <div class="carousel">
-          <button class="carousel-arrow prev"><i class="fas fa-chevron-left"></i></button>
-          <div class="carousel-track" id="genre-28"></div>
-          <button class="carousel-arrow next"><i class="fas fa-chevron-right"></i></button>
-        </div>
+  <!-- Movie/TV Detail Modal -->
+  <div id="movie-modal" 
+       class="fixed inset-0 bg-black bg-opacity-75 hidden justify-center items-center p-4 overflow-auto">
+    <div class="bg-gray-800 rounded-lg overflow-hidden w-full max-w-3xl transform scale-95 opacity-0 transition-all duration-300">
+      <div class="flex justify-between items-center p-4 border-b border-gray-700">
+        <h2 id="modal-title" class="text-2xl font-semibold"></h2>
+        <button id="close-modal" class="text-gray-400 hover:text-white">
+          <i class="fas fa-times fa-lg"></i>
+        </button>
       </div>
-    -->
-  </section>
-
-  <!-- MODALE: Selettore Stagioni -->
-  <div id="season-selector" class="modal hidden">
-    <div class="modal-content">
-      <button class="modal-close"><i class="fas fa-times"></i></button>
-      <h3>Seleziona Stagione</h3>
-      <div class="carousel">
-        <button class="carousel-arrow prev"><i class="fas fa-chevron-left"></i></button>
-        <div class="carousel-track" id="season-carousel">
-          <!-- copertine stagioni -->
+      <div class="p-4 space-y-4">
+        <div class="flex flex-col md:flex-row md:space-x-4">
+          <img id="modal-poster" class="w-32 h-48 rounded object-cover mb-4 md:mb-0" src="" alt="Poster">
+          <div class="space-y-2">
+            <p><strong>Anno:</strong> <span id="modal-year"></span></p>
+            <p><strong>Durata:</strong> <span id="modal-runtime"></span></p>
+            <p><strong>Voto:</strong> <span id="modal-rating"></span></p>
+            <div id="modal-genres" class="flex flex-wrap gap-2"></div>
+            <div id="modal-cast" class="flex flex-wrap gap-2"></div>
+            <p class="mt-2" id="modal-overview"></p>
+          </div>
         </div>
-        <button class="carousel-arrow next"><i class="fas fa-chevron-right"></i></button>
+        <button id="modal-play-button" 
+                class="w-full px-4 py-2 bg-red-600 rounded hover:bg-red-500">
+          <i class="fas fa-play mr-2"></i>Riproduci
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- MODALE: Selettore Episodi -->
-  <div id="episode-selector" class="modal hidden">
-    <div class="modal-content">
-      <button class="modal-close"><i class="fas fa-times"></i></button>
-      <h3>Seleziona Episodio</h3>
-      <div class="carousel">
-        <button class="carousel-arrow prev"><i class="fas fa-chevron-left"></i></button>
-        <div class="carousel-track" id="episode-carousel">
-          <!-- copertine episodi -->
-        </div>
-        <button class="carousel-arrow next"><i class="fas fa-chevron-right"></i></button>
+  <!-- Player Modal -->
+  <div id="player-modal" 
+       class="fixed inset-0 bg-black bg-opacity-90 hidden justify-center items-center p-4">
+    <div class="relative w-full max-w-3xl">
+      <button id="close-player" 
+              class="absolute top-2 right-2 text-white text-2xl z-10">
+        <i class="fas fa-times"></i>
+      </button>
+      <div id="videoContainer" class="w-full aspect-video bg-black">
+        <video id="videoPlayer" class="w-full h-full" controls></video>
       </div>
     </div>
   </div>
 
-  <!-- PLAYER MODAL (rimane identico a prima, load via player.js) -->
-  <div id="player-modal" class="hidden">
-    <div id="videoContainer">
-      <!-- ...tutto il markup di player.js... -->
-    </div>
-  </div>
-
-  <!-- FOOTER -->
-  <footer class="site-footer">
-    <p>&copy; 2025 VixStream. Tutti i diritti riservati.</p>
-  </footer>
-
-  <!-- SCRIPTS -->
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <script src="player.js"></script>
-  <script src="main.js"></script>
+  <script>
+    const PROXY_URL = 'https://vixstreamproxy.onrender.com/';
+    let availableContent = [];
+    let currentHeroMovie = null;
+    const episodeMap = new Map();
+    let scrollPosition = 0;
+
+    // Utility: lock/unlock scroll
+    function lockScroll() {
+      scrollPosition = window.pageYOffset;
+      document.body.classList.add('lock-scroll');
+      document.body.style.top = `-${scrollPosition}px`;
+    }
+    function unlockScroll() {
+      document.body.classList.remove('lock-scroll');
+      document.body.style.top = '';
+      window.scrollTo(0, scrollPosition);
+    }
+
+    // Load available content for filtering
+    async function loadAvailableContent() {
+      try {
+        const res = await fetch(`${PROXY_URL}home/available`);
+        availableContent = await res.json();
+      } catch {
+        availableContent = [];
+      }
+    }
+
+    // Fetch and render functions
+    async function getTrendingMovies() {
+      const el = document.getElementById('trendingMovies');
+      el.innerHTML = '';
+      try {
+        const res = await fetch(`${PROXY_URL}trending/movie/week`);
+        const { results } = await res.json();
+        results.filter(m => availableContent.some(a => a.tmdb_id === m.id))
+               .slice(0, 10)
+               .forEach(m => el.appendChild(createMovieCard(m, 'movie')));
+      } catch {
+        el.innerHTML = '<p class="text-gray-400">Errore caricamento in tendenza</p>';
+      }
+    }
+    async function getTopRatedMovies() {
+      const el = document.getElementById('topRatedMovies');
+      el.innerHTML = '';
+      try {
+        const res = await fetch(`${PROXY_URL}movie/top_rated`);
+        const { results } = await res.json();
+        results.filter(m => availableContent.some(a => a.tmdb_id === m.id))
+               .slice(0, 10)
+               .forEach(m => el.appendChild(createMovieCard(m, 'movie')));
+      } catch {
+        el.innerHTML = '<p class="text-gray-400">Errore caricamento più votati</p>';
+      }
+    }
+    async function getUpcomingMovies() {
+      const el = document.getElementById('upcomingMovies');
+      el.innerHTML = '';
+      try {
+        const res = await fetch(`${PROXY_URL}movie/upcoming`);
+        const { results } = await res.json();
+        results.filter(m => availableContent.some(a => a.tmdb_id === m.id))
+               .slice(0, 10)
+               .forEach(m => el.appendChild(createMovieCard(m, 'movie')));
+      } catch {
+        el.innerHTML = '<p class="text-gray-400">Errore caricamento prossime uscite</p>';
+      }
+    }
+    async function getPopularTv() {
+      const el = document.getElementById('popularTv');
+      el.innerHTML = '';
+      try {
+        const res = await fetch(`${PROXY_URL}tv/popular`);
+        const { results } = await res.json();
+        results.filter(tv => availableContent.some(a => a.tmdb_id === tv.id))
+               .slice(0, 10)
+               .forEach(tv => el.appendChild(createMovieCard(tv, 'tv')));
+      } catch {
+        el.innerHTML = '<p class="text-gray-400">Errore caricamento serie</p>';
+      }
+    }
+
+    // Hero random content
+    async function getRandomHeroContent() {
+      try {
+        const [mvRes, tvRes] = await Promise.all([
+          fetch(`${PROXY_URL}movie/popular`),
+          fetch(`${PROXY_URL}tv/popular`)
+        ]);
+        const movies = (await mvRes.json()).results.map(i => ({...i, media_type:'movie'}));
+        const tvs    = (await tvRes.json()).results.map(i => ({...i, media_type:'tv'}));
+        const pool   = [...movies, ...tvs]
+                      .filter(i => availableContent.some(a => a.tmdb_id === i.id));
+        if (!pool.length) return;
+        const pick  = pool[Math.floor(Math.random()*pool.length)];
+        const details = await (await fetch(`${PROXY_URL}${pick.media_type}/${pick.id}`)).json();
+        currentHeroMovie = {...details, media_type: pick.media_type};
+        displayHeroMovie(currentHeroMovie);
+      } catch {}
+    }
+    function displayHeroMovie(content) {
+      const heroBackdropEl = document.getElementById('hero-backdrop');
+      const clone = heroBackdropEl.cloneNode();
+      clone.style.backgroundImage = `url(https://image.tmdb.org/t/p/original${content.backdrop_path})`;
+      clone.style.opacity = '0'; clone.style.position = 'absolute';
+      heroBackdropEl.parentNode.appendChild(clone);
+      requestAnimationFrame(() => clone.style.opacity = '1');
+      clone.addEventListener('transitionend', () => {
+        heroBackdropEl.style.backgroundImage = clone.style.backgroundImage;
+        clone.remove();
+      }, { once: true });
+
+      document.getElementById('hero-title').textContent    = content.title || content.name;
+      document.getElementById('hero-overview').textContent = content.overview || '';
+    }
+
+    // Create a card
+    function createMovieCard(item, type) {
+      const card = document.createElement('div');
+      card.className = 'cursor-pointer rounded overflow-hidden bg-gray-800';
+      card.innerHTML = `
+        <img src="https://image.tmdb.org/t/p/w300${item.poster_path}"
+             alt="${item.title||item.name}" class="w-full h-48 object-cover"/>
+        <div class="p-2">
+          <h4 class="font-semibold truncate">${item.title||item.name}</h4>
+          <p class="text-sm text-gray-400">${type==='movie'
+            ? (item.release_date||'').split('-')[0]
+            : (item.first_air_date||'').split('-')[0]
+          }</p>
+        </div>`;
+      card.addEventListener('click', () => {
+        type==='tv' ? showTVSeasons(item.id) 
+                    : showMovieDetails({...item, media_type:'movie'});
+      });
+      return card;
+    }
+
+    // Search
+    async function searchMedia(query) {
+      query = query || document.getElementById('search-input').value
+                                  || document.getElementById('mobile-search-input').value;
+      if (!query.trim()) return;
+      const res = await fetch(`${PROXY_URL}search?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      const list = data.results.filter(i => ['movie','tv'].includes(i.media_type))
+                               .filter(i => availableContent.some(a => a.tmdb_id===i.id));
+      if (!list.length) return alert('Nessun risultato disponibile.');
+      showSearchResults(list);
+    }
+    function showSearchResults(arr) {
+      const section = document.getElementById('search-results-section');
+      const container = document.getElementById('search-results-container');
+      section.classList.remove('hidden'); lockScroll();
+      container.innerHTML = arr.map(i => {
+        return `
+          <div class="p-4 mb-2 bg-gray-700 rounded">
+            <h4 class="font-semibold">${i.title||i.name}</h4>
+            <p class="text-sm">${i.overview||''}</p>
+            <button class="mt-2 px-3 py-1 bg-red-600 rounded"
+                    onclick="handleResultClick(${i.id},'${i.media_type}',${JSON.stringify(i)})">
+              Riproduci
+            </button>
+          </div>`;
+      }).join('');
+    }
+    function clearSearch() {
+      document.getElementById('search-results-section').classList.add('hidden');
+      unlockScroll();
+    }
+
+    // Handle result click
+    async function handleResultClick(id, type, itemData=null) {
+      clearSearch();
+      const detail = itemData || await (await fetch(`${PROXY_URL}${type}/${id}`)).json();
+      detail.media_type = type;
+      if (type==='tv') showTVSeasons(id); else playMovie(detail);
+    }
+
+    // Show seasons
+    async function showTVSeasons(tvId) {
+      const modal = document.getElementById('seasonEpisodeSelector');
+      const title = document.getElementById('selectorTitle');
+      const body  = document.getElementById('selectorContent');
+      modal.classList.remove('hidden'); requestAnimationFrame(() => {
+        modal.classList.replace('opacity-0','opacity-100');
+        modal.classList.replace('scale-95','scale-100');
+      });
+      title.textContent = 'Caricamento stagioni...';
+      body.innerHTML = '<p class="text-center py-8"><i class="fas fa-spinner fa-spin"></i></p>';
+      try {
+        const data = await (await fetch(`${PROXY_URL}tv/${tvId}`)).json();
+        const seasons = data.seasons.filter(s=>s.episode_count>0);
+        title.textContent = 'Seleziona Stagione';
+        body.innerHTML = seasons.map(s=>`
+          <div class="cursor-pointer p-4 bg-gray-700 mb-2 rounded"
+               onclick="showEpisodes(${tvId},${s.season_number})">
+            Stagione ${s.season_number} — ${s.episode_count} episodi
+          </div>
+        `).join('');
+      } catch {
+        body.innerHTML = '<p class="text-red-500">Errore caricamento stagioni</p>';
+      }
+    }
+    async function showEpisodes(tvId, season) {
+      const modal = document.getElementById('seasonEpisodeSelector');
+      const title = document.getElementById('selectorTitle');
+      const body  = document.getElementById('selectorContent');
+      title.textContent = `Episodi Stagione ${season}`;
+      body.innerHTML = '<p class="text-center py-8"><i class="fas fa-spinner fa-spin"></i></p>';
+      try {
+        const episodes = (await (await fetch(`${PROXY_URL}tv/${tvId}/season/${season}`)).json()).episodes;
+        title.textContent = `Stagione ${season}`;
+        body.innerHTML = episodes.map(ep=>`
+          <div class="cursor-pointer p-4 bg-gray-700 mb-2 rounded"
+               onclick="playTVEpisode('${tvId}-${season}-${ep.episode_number}')">
+            ${ep.episode_number}. ${ep.name||'Senza titolo'}
+          </div>
+        `).join('');
+        episodes.forEach(ep => {
+          const key = `${tvId}-${season}-${ep.episode_number}`;
+          episodeMap.set(key, { tvId, season, epNum: ep.episode_number });
+        });
+      } catch {
+        body.innerHTML = '<p class="text-red-500">Errore caricamento episodi</p>';
+      }
+    }
+    function closeSeasonEpisodeSelector() {
+      const modal = document.getElementById('seasonEpisodeSelector');
+      modal.classList.replace('opacity-100','opacity-0');
+      modal.classList.replace('scale-100','scale-95');
+      setTimeout(()=>modal.classList.add('hidden'), 300);
+    }
+    function playTVEpisode(key) {
+      const { tvId, season, epNum } = episodeMap.get(key);
+      playMovie({ id: tvId, media_type:'tv', season, episode: epNum });
+      closeSeasonEpisodeSelector();
+    }
+
+    // Play Movie/TV
+    function playMovie(detail) {
+      const playerModal = document.getElementById('player-modal');
+      const video = document.getElementById('videoPlayer');
+      const url = `${PROXY_URL}hls/${detail.media_type}/${detail.id}`;
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+      } else {
+        video.src = url;
+      }
+      playerModal.classList.remove('hidden');
+      lockScroll();
+      video.play();
+      video.onended = () => closePlayer();
+      video.ontimeupdate = () => saveProgress(detail, video);
+    }
+    function closePlayer() {
+      const playerModal = document.getElementById('player-modal');
+      const video = document.getElementById('videoPlayer');
+      video.pause();
+      video.src = '';
+      playerModal.classList.add('hidden');
+      unlockScroll();
+    }
+    async function saveProgress(detail, video) {
+      try {
+        await fetch(`${PROXY_URL}progress/save`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            ip: 'demo',
+            tmdbId: detail.id,
+            contentType: detail.media_type,
+            currentTime: video.currentTime,
+            duration: video.duration
+          })
+        });
+      } catch {}
+    }
+
+    // Search event listeners & close modals
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadAvailableContent();
+      getTrendingMovies();
+      getTopRatedMovies();
+      getUpcomingMovies();
+      getPopularTv();
+      getRandomHeroContent();
+
+      document.getElementById('search-button')
+              .addEventListener('click', () => searchMedia());
+      document.getElementById('search-input')
+              .addEventListener('keydown', e => e.key==='Enter' && searchMedia());
+      document.getElementById('mobile-search-button')
+              .addEventListener('click', () => {
+                searchMedia(); 
+                document.getElementById('mobile-search-box').classList.remove('active');
+              });
+      document.getElementById('mobile-search-input')
+              .addEventListener('keydown', e => e.key==='Enter' && searchMedia());
+
+      // Mobile search toggle
+      const mobileToggle = document.getElementById('mobile-search-toggle');
+      const mobileBox    = document.getElementById('mobile-search-box');
+      mobileToggle.addEventListener('click', e => {
+        e.stopPropagation();
+        mobileBox.classList.toggle('active');
+        if (mobileBox.classList.contains('active')) {
+          setTimeout(()=>document.getElementById('mobile-search-input').focus(), 50);
+        }
+      });
+      document.addEventListener('click', e => {
+        if (!mobileBox.contains(e.target) && !mobileToggle.contains(e.target)) {
+          mobileBox.classList.remove('active');
+        }
+      });
+
+      // Close detail modal
+      document.getElementById('close-modal')
+              .addEventListener('click', () => {
+        const m = document.getElementById('movie-modal');
+        m.classList.replace('opacity-100','opacity-0');
+        m.classList.replace('scale-100','scale-95');
+        setTimeout(()=> m.classList.add('hidden'), 300);
+      });
+      window.addEventListener('keydown', e => {
+        if (e.key==='Escape') {
+          document.getElementById('seasonEpisodeSelector').classList.add('hidden');
+          document.getElementById('player-modal').classList.add('hidden');
+          const m = document.getElementById('movie-modal');
+          if (!m.classList.contains('hidden')) {
+            m.classList.replace('opacity-100','opacity-0');
+            m.classList.replace('scale-100','scale-95');
+            setTimeout(()=> m.classList.add('hidden'), 300);
+          }
+        }
+      });
+      window.addEventListener('click', e => {
+        if (e.target === document.getElementById('player-modal')) closePlayer();
+      });
+    });
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .catch(err => console.warn('SW failed:', err));
+    }
+  </script>
+
 </body>
 </html>
