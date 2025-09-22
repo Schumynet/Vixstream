@@ -46,3 +46,40 @@ video {
   width: 100%;
   max-width: 800px;
 }
+
+
+
+.catalogo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  padding: 20px;
+}
+
+.card {
+  background: #111;
+  border-radius: 8px;
+  overflow: hidden;
+  text-align: center;
+  color: white;
+}
+
+.card img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.card h3 {
+  font-size: 1rem;
+  margin: 8px 0;
+}
+
+.card button {
+  background: red;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
