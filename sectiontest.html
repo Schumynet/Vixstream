@@ -456,6 +456,25 @@ let modalType = 'movie';
 document.getElementById('btn-back').onclick = () => {
   document.getElementById('modal').classList.add('hidden');
 };
+
+document.getElementById('btn-watch').onclick = () => {
+  const box = document.getElementById('continue-watch');
+  const section = document.getElementById('continue-section');
+
+  // Evita duplicati: controlla se il contenuto è già presente
+  const existing = [...box.children].find(el => {
+    const title = el.querySelector('h3')?.textContent;
+    return title === (modalType === 'tv' ? modalItem.name : modalItem.title);
+  });
+
+  if (!existing) {
+    box.appendChild(createCard(modalItem, modalType));
+  }
+
+  section.classList.remove('hidden');
+  document.getElementById('modal').classList.add('hidden');
+};
+
 </script>
 
 </body>
