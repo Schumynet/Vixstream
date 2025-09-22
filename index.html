@@ -4,14 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>VixStream</title>
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome -->
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
-  <!-- HLS.js -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     body { background: #121212; color: #e5e5e5; }
@@ -96,7 +93,7 @@
     </div>
   </section>
 
-  <!-- MAIN -->
+  <!-- MAIN CONTENT -->
   <main class="pt-16 space-y-16">
     <div class="max-w-6xl mx-auto px-4 space-y-12">
 
@@ -141,7 +138,7 @@
     </div>
   </main>
 
-  <!-- MODALI -->
+  <!-- MOVIE MODAL -->
   <div id="movie-modal"
        class="fixed inset-0 z-50 hidden items-center justify-center modal-bg p-4">
     <div class="modal-content p-6 relative">
@@ -167,6 +164,7 @@
     </div>
   </div>
 
+  <!-- SEASONS & EPISODES -->
   <div id="seasonEpisodeSelector"
        class="fixed inset-0 z-50 hidden items-center justify-center modal-bg p-4">
     <div class="modal-content p-6 relative">
@@ -179,6 +177,7 @@
     </div>
   </div>
 
+  <!-- PLAYER MODAL -->
   <div id="player-modal"
        class="fixed inset-0 z-50 hidden items-center justify-center modal-bg p-4">
     <div class="modal-content p-0 relative w-full max-w-3xl">
@@ -202,8 +201,10 @@
     async function loadAvailable() {
       try {
         const res = await fetch(`${PROXY}/home/available`);
-        available = (await res.json())
-          .map(i => ({ tmdb_id: i.tmdb_id, type: i.type }));
+        available = (await res.json()).map(i => ({
+          tmdb_id: i.tmdb_id,
+          type: i.type
+        }));
       } catch (e) { console.error(e); }
     }
 
@@ -211,43 +212,6 @@
       const r = await fetch(`${TMDB}${path}&api_key=${API_KEY}&language=it-IT`);
       return r.json();
     }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      await loadAvailable();
-      getTrending();
-      getPopularTv();
-      getTopRated();
-      getUpcoming();
-      getHero();
-      displayContinue();
-
-      // Search handlers
-      document.getElementById('search-button').onclick = () => searchMedia();
-      document.getElementById('search-input').onkeydown = e => { if(e.key==='Enter') searchMedia(); };
-      document.getElementById('mobile-search-button').onclick = () => searchMedia(document.getElementById('mobile-search-input').value);
-      document.getElementById('mobile-search-input').onkeydown = e => { if(e.key==='Enter') searchMedia(e.target.value); };
-
-      // Mobile search toggle
-      const toggle = document.getElementById('mobile-search-toggle');
-      toggle.onclick = e => {
-        e.stopPropagation();
-        document.getElementById('mobile-search-box').classList.toggle('hidden');
-      };
-      document.addEventListener('click', e => {
-        if (!document.getElementById('mobile-search-box').contains(e.target) &&
-            !toggle.contains(e.target)) {
-          document.getElementById('mobile-search-box').classList.add('hidden');
-        }
-      });
-
-      // Close modals
-      document.getElementById('close-modal').onclick = closeMovieModal;
-      document.getElementById('close-player').onclick = closePlayerModal;
-      window.onclick = e => {
-        if (e.target.id === 'movie-modal') closeMovieModal();
-        if (e.target.id === 'player-modal') closePlayerModal();
-      };
-    });
 
     function createCard(item, type) {
       const src = item.poster_path
@@ -264,10 +228,13 @@
       };
       div.innerHTML = `
         <img src="${src}" class="rounded-lg w-full h-64 object-cover"/>
-        <h3 class="mt-2 text-sm font-semibold truncate">${type==='tv'?item.name:item.title}</h3>
-        <p class="text-gray-400 text-xs">${
-          ((type==='tv'?item.first_air_date:item.release_date)||'').split('-')[0]||'N/A'
-        }</p>`;
+        <h3 class="mt-2 text-sm font-semibold truncate">
+          ${type==='tv'?item.name:item.title}
+        </h3>
+        <p class="text-gray-400 text-xs">
+          ${((type==='tv'?item.first_air_date:item.release_date)||'')
+            .split('-')[0]||'N/A'}
+        </p>`;
       return div;
     }
 
@@ -284,9 +251,9 @@
       const c = document.getElementById('trending-movies');
       c.innerHTML = '';
       d.results
-        .filter(x => available.some(a => a.tmdb_id === x.id))
-        .slice(0,10)
-        .forEach(x => c.appendChild(createCard(x,'movie')));
+       .filter(x => available.some(a => a.tmdb_id === x.id))
+       .slice(0,10)
+       .forEach(x => c.appendChild(createCard(x,'movie')));
     }
 
     async function getPopularTv() {
@@ -294,9 +261,9 @@
       const c = document.getElementById('popular-tv');
       c.innerHTML = '';
       d.results
-        .filter(x => available.some(a => a.tmdb_id === x.id))
-        .slice(0,10)
-        .forEach(x => c.appendChild(createCard(x,'tv')));
+       .filter(x => available.some(a => a.tmdb_id === x.id))
+       .slice(0,10)
+       .forEach(x => c.appendChild(createCard(x,'tv')));
     }
 
     async function getTopRated() {
@@ -304,9 +271,9 @@
       const c = document.getElementById('top-rated-movies');
       c.innerHTML = '';
       d.results
-        .filter(x => available.some(a => a.tmdb_id === x.id))
-        .slice(0,10)
-        .forEach(x => c.appendChild(createCard(x,'movie')));
+       .filter(x => available.some(a => a.tmdb_id === x.id))
+       .slice(0,10)
+       .forEach(x => c.appendChild(createCard(x,'movie')));
     }
 
     async function getUpcoming() {
@@ -314,9 +281,9 @@
       const c = document.getElementById('upcoming-movies');
       c.innerHTML = '';
       d.results
-        .filter(x => available.some(a => a.tmdb_id === x.id))
-        .slice(0,10)
-        .forEach(x => c.appendChild(createCard(x,'movie')));
+       .filter(x => available.some(a => a.tmdb_id === x.id))
+       .slice(0,10)
+       .forEach(x => c.appendChild(createCard(x,'movie')));
     }
 
     async function getHero() {
@@ -325,10 +292,10 @@
         tmdbFetch('/tv/popular?')
       ]);
       const all = [
-        ...m.results.map(i => ({...i, media_type:'movie'})),
-        ...t.results.map(i => ({...i, media_type:'tv'}))
+        ...m.results.map(i => ({...i,media_type:'movie'})),
+        ...t.results.map(i => ({...i,media_type:'tv'}))
       ];
-      const pick = all.filter(x => available.some(a => a.tmdb_id === x.id));
+      const pick = all.filter(x => available.some(a=>a.tmdb_id===x.id));
       if (!pick.length) return;
       const sel = pick[Math.floor(Math.random()*pick.length)];
       const det = await getDetails(sel.id, sel.media_type);
@@ -467,7 +434,7 @@
         for (let it of p.progress.slice(0,5)) {
           const det = await getDetails(it.tmdbId, it.contentType);
           const card = document.createElement('div');
-          card.className='cursor-pointer';
+          card.className = 'cursor-pointer';
           card.onclick = () => {
             if (it.contentType==='tv') playTV(it.tmdbId, it.season, it.episode);
             else play({ id: it.tmdbId, media_type:'movie' });
@@ -477,7 +444,7 @@
             : det.backdrop_path
               ? IMG_PATH + det.backdrop_path
               : 'https://via.placeholder.com/500x750?text=No+Image';
-          card.innerHTML=`
+          card.innerHTML = `
             <img src="${src}" class="rounded-lg w-full h-64 object-cover">
             <h3 class="mt-2 text-sm font-semibold truncate">${det.title||det.name}</h3>
           `;
@@ -485,6 +452,37 @@
         }
       } catch(e){ console.error(e); }
     }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadAvailable();
+      getTrending();
+      getPopularTv();
+      getTopRated();
+      getUpcoming();
+      getHero();
+      displayContinue();
+      // search handlers
+      document.getElementById('search-button').onclick = () => searchMedia();
+      document.getElementById('search-input').onkeydown = e => { if (e.key==='Enter') searchMedia(); };
+      document.getElementById('mobile-search-button').onclick = ()
+        => searchMedia(document.getElementById('mobile-search-input').value);
+      document.getElementById('mobile-search-input').onkeydown = e => { if (e.key==='Enter') searchMedia(e.target.value); };
+      // mobile toggle
+      const toggle = document.getElementById('mobile-search-toggle');
+      toggle.onclick = e => { e.stopPropagation(); document.getElementById('mobile-search-box').classList.toggle('hidden'); };
+      document.addEventListener('click', e => {
+        if (!document.getElementById('mobile-search-box').contains(e.target) && !toggle.contains(e.target)) {
+          document.getElementById('mobile-search-box').classList.add('hidden');
+        }
+      });
+      // close modals
+      document.getElementById('close-modal').onclick = closeMovieModal;
+      document.getElementById('close-player').onclick = closePlayerModal;
+      window.onclick = e => {
+        if (e.target.id==='movie-modal') closeMovieModal();
+        if (e.target.id==='player-modal') closePlayerModal();
+      };
+    });
   </script>
 
 </body>
