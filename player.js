@@ -53,5 +53,5 @@ function loadVideo(manifestUrl, containerId = "player") {
     } else {
       showError(container, "Il tuo browser non supporta HLS.");
     }
-  }, 500);
+  }, 500); // Simulazione breve di caricamento
 }
