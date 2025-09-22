@@ -3,94 +3,133 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Test Ricerca + Generi TMDB</title>
+  <title>Test VixStream – Ricerca & Sezioni</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background: #121212; color: #e5e5e5; }
     .poster { height: 300px; object-fit: cover; border-radius: 8px; }
-    select, input { background-color: #1f1f1f; color: white; border-radius: 6px; padding: 6px; }
-    label { font-weight: 500; margin-right: 8px; }
+    .dropdown-bg { background: #1f1f1f; }
   </style>
 </head>
 <body class="p-6">
 
-  <h1 class="text-3xl font-bold mb-6 text-red-500">🎯 Test Ricerca + Sezioni Generi TMDB</h1>
+  <!-- Barra di ricerca compatta -->
+  <div class="max-w-4xl mx-auto mb-10 relative">
+    <div id="search-bar" class="flex items-center bg-gray-800 rounded-lg px-4 py-2 cursor-text">
+      <i class="fas fa-search text-gray-400 mr-2"></i>
+      <input
+        id="search-title"
+        type="text"
+        placeholder="Titolo..."
+        class="bg-transparent flex-1 placeholder-gray-400 text-white focus:outline-none"
+      />
+    </div>
 
-  <!-- Barra di ricerca -->
-  <div class="mb-10 space-y-4">
-    <div class="flex flex-wrap gap-4 items-center">
-      <label for="query">Titolo:</label>
-      <input type="text" id="query" placeholder="Es. Matrix" class="w-64"/>
-
-      <label for="year">Anno:</label>
-      <input type="number" id="year" placeholder="Es. 1999" class="w-24"/>
-
-      <label for="type">Tipologia:</label>
-      <select id="type">
-        <option value="">Tutti</option>
-        <option value="movie">Film</option>
-        <option value="tv">Serie TV</option>
-      </select>
-
-      <label for="genre">Genere:</label>
-      <select id="genre">
-        <option value="">Tutti</option>
-      </select>
-
-      <button id="search" class="bg-red-600 px-4 py-2 rounded hover:bg-red-700 font-semibold">
-        Cerca
-      </button>
+    <!-- Tendina filtri -->
+    <div
+      id="search-dropdown"
+      class="absolute inset-x-0 mt-2 p-4 rounded-lg shadow-lg dropdown-bg hidden z-20"
+    >
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="md:col-span-2">
+          <label class="block text-sm mb-1">Titolo</label>
+          <input
+            id="filter-title"
+            type="text"
+            placeholder="Es. Matrix"
+            class="w-full px-3 py-2 bg-gray-800 text-white rounded focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Anno</label>
+          <input
+            id="filter-year"
+            type="number"
+            placeholder="1999"
+            class="w-full px-3 py-2 bg-gray-800 text-white rounded focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Tipologia</label>
+          <select
+            id="filter-type"
+            class="w-full px-3 py-2 bg-gray-800 text-white rounded focus:outline-none"
+          >
+            <option value="">Tutti</option>
+            <option value="movie">Film</option>
+            <option value="tv">Serie TV</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Genere</label>
+          <select
+            id="filter-genre"
+            class="w-full px-3 py-2 bg-gray-800 text-white rounded focus:outline-none"
+          >
+            <option value="">Tutti</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-4 text-right">
+        <button
+          id="btn-search"
+          class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-semibold"
+        >
+          Cerca
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Risultati ricerca -->
-  <section id="results-section" class="hidden">
-    <h2 class="text-xl font-semibold mb-4">🔍 Risultati ricerca</h2>
-    <div id="results" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
+  <!-- Sezione risultati ricerca -->
+  <section id="results-section" class="max-w-6xl mx-auto mb-12 hidden">
+    <h2 class="text-2xl font-bold mb-4">🔍 Risultati ricerca</h2>
+    <div id="results" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
   </section>
 
-  <!-- Sezioni TMDB -->
-  <section>
-    <h2 class="text-xl font-semibold mb-4">🎬 Film in tendenza</h2>
-    <div id="trending" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
-  </section>
+  <!-- Sezioni TMDB standard -->
+  <div class="max-w-6xl mx-auto space-y-16">
+    <section>
+      <h2 class="text-2xl font-bold mb-4">🎬 Film in tendenza</h2>
+      <div id="trending" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+    </section>
 
-  <section>
-    <h2 class="text-xl font-semibold mb-4">📺 Serie TV popolari</h2>
-    <div id="tv" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
-  </section>
+    <section>
+      <h2 class="text-2xl font-bold mb-4">📺 Serie TV popolari</h2>
+      <div id="tv" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+    </section>
 
-  <section>
-    <h2 class="text-xl font-semibold mb-4">⭐ Film più votati</h2>
-    <div id="top" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
-  </section>
+    <section>
+      <h2 class="text-2xl font-bold mb-4">⭐ Film più votati</h2>
+      <div id="top" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+    </section>
 
-  <section>
-    <h2 class="text-xl font-semibold mb-4">🎞️ Film al cinema</h2>
-    <div id="upcoming" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
-  </section>
+    <section>
+      <h2 class="text-2xl font-bold mb-4">🎞️ Film al cinema</h2>
+      <div id="upcoming" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+    </section>
 
-  <!-- Sezioni per generi -->
-  <div id="genre-sections"></div>
+    <!-- Sezioni per primi 6 generi -->
+    <div id="genre-sections" class="space-y-16"></div>
+  </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <script>
     const API_KEY = '1e8c9083f94c62dd66fb2105cd7b613b';
     const TMDB = 'https://api.themoviedb.org/3';
-    const POSTER_PATH = 'https://image.tmdb.org/t/p/w500';
-    let genreMap = {};
-    let genreList = [];
+    const POSTER = 'https://image.tmdb.org/t/p/w500';
+    let genreMap = {}, genreList = [];
 
+    // Crea card locandina
     function createCard(item, type) {
       const src = item.poster_path
-        ? POSTER_PATH + item.poster_path
+        ? POSTER + item.poster_path
         : item.backdrop_path
-          ? POSTER_PATH + item.backdrop_path
+          ? POSTER + item.backdrop_path
           : 'https://via.placeholder.com/500x750?text=No+Image';
-
       const title = type === 'tv' ? item.name : item.title;
       const year = (type === 'tv' ? item.first_air_date : item.release_date || '').split('-')[0] || 'N/A';
       const genres = (item.genre_ids || []).map(id => genreMap[id]).filter(Boolean).join(', ');
-
       const div = document.createElement('div');
       div.innerHTML = `
         <img src="${src}" alt="${title}" class="poster w-full mb-2"/>
@@ -101,98 +140,113 @@
       return div;
     }
 
-    async function loadSection(endpoint, containerId, type) {
-      const res = await fetch(`${TMDB}${endpoint}?api_key=${API_KEY}&language=it-IT`);
+    // Carica sezione TMDB
+    async function loadSection(path, container, type) {
+      const res = await fetch(`${TMDB}${path}?api_key=${API_KEY}&language=it-IT`);
       const data = await res.json();
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';
-      data.results.slice(0, 10).forEach(item => {
-        container.appendChild(createCard(item, type));
-      });
+      const el = document.getElementById(container);
+      el.innerHTML = '';
+      data.results.slice(0, 10).forEach(i => el.appendChild(createCard(i, type)));
     }
 
+    // Carica generi, dropdown e sezioni generi
     async function loadGenres() {
-      const [movieRes, tvRes] = await Promise.all([
+      const [mvRes, tvRes] = await Promise.all([
         fetch(`${TMDB}/genre/movie/list?api_key=${API_KEY}&language=it-IT`),
         fetch(`${TMDB}/genre/tv/list?api_key=${API_KEY}&language=it-IT`)
       ]);
-      const movieGenres = await movieRes.json();
-      const tvGenres = await tvRes.json();
-      genreList = [...movieGenres.genres, ...tvGenres.genres];
+      const mv = await mvRes.json(), tv = await tvRes.json();
+      genreList = [...mv.genres, ...tv.genres];
+      genreList.forEach(g => genreMap[g.id] = g.name);
+
+      // popola dropdown generi
+      const sel = document.getElementById('filter-genre');
       genreList.forEach(g => {
-        genreMap[g.id] = g.name;
+        const o = document.createElement('option');
+        o.value = g.id; o.textContent = g.name;
+        sel.appendChild(o);
       });
 
-      const genreSelect = document.getElementById('genre');
-      genreList.forEach(g => {
-        const opt = document.createElement('option');
-        opt.value = g.id;
-        opt.textContent = g.name;
-        genreSelect.appendChild(opt);
-      });
-
-      // Crea sezioni per generi
+      // sezioni primi 6 generi
       const container = document.getElementById('genre-sections');
-      genreList.slice(0, 6).forEach(g => {
-        const section = document.createElement('section');
-        section.innerHTML = `
-          <h2 class="text-xl font-semibold mb-4">🎭 ${g.name}</h2>
-          <div id="genre-${g.id}" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12"></div>
+      genreList.slice(0,6).forEach(g => {
+        const s = document.createElement('section');
+        s.innerHTML = `
+          <h2 class="text-2xl font-bold mb-4">🎭 ${g.name}</h2>
+          <div id="genre-${g.id}" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
         `;
-        container.appendChild(section);
-        loadByGenre(g.id, `genre-${g.id}`);
+        container.appendChild(s);
+        loadSection(`/discover/movie?with_genres=${g.id}`, `genre-${g.id}`, 'movie');
       });
     }
 
-    async function loadByGenre(genreId, containerId) {
-      const res = await fetch(`${TMDB}/discover/movie?api_key=${API_KEY}&language=it-IT&with_genres=${genreId}`);
-      const data = await res.json();
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';
-      data.results.slice(0, 10).forEach(item => {
-        container.appendChild(createCard(item, 'movie'));
+    // Cerca con search/multi o discover
+    async function doSearch() {
+      const q = document.getElementById('filter-title').value.trim();
+      const y = document.getElementById('filter-year').value.trim();
+      const t = document.getElementById('filter-type').value;
+      const g = document.getElementById('filter-genre').value;
+      let results = [];
+
+      if (q) {
+        const res = await fetch(`${TMDB}/search/multi?api_key=${API_KEY}&language=it-IT&query=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        results = data.results;
+      } else {
+        // discover movie
+        if (!t || t === 'movie') {
+          let url = `${TMDB}/discover/movie?api_key=${API_KEY}&language=it-IT`;
+          if (y) url += `&primary_release_year=${y}`;
+          if (g) url += `&with_genres=${g}`;
+          const d = await fetch(url).then(r => r.json());
+          results.push(...d.results);
+        }
+        // discover tv
+        if (!t || t === 'tv') {
+          let url = `${TMDB}/discover/tv?api_key=${API_KEY}&language=it-IT`;
+          if (y) url += `&first_air_date_year=${y}`;
+          if (g) url += `&with_genres=${g}`;
+          const d = await fetch(url).then(r => r.json());
+          results.push(...d.results);
+        }
+      }
+
+      // filtro locale
+      const filtered = results.filter(i => {
+        if (!['movie','tv'].includes(i.media_type || t)) return false;
+        return true;
       });
-    }
 
-    async function search() {
-      const query = document.getElementById('query').value.trim();
-      const year = document.getElementById('year').value.trim();
-      const type = document.getElementById('type').value;
-      const genre = document.getElementById('genre').value;
-
-      if (!query) return;
-
-      const url = `${TMDB}/search/multi?api_key=${API_KEY}&language=it-IT&query=${encodeURIComponent(query)}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const container = document.getElementById('results');
-      container.innerHTML = '';
-
-      const filtered = data.results.filter(item => {
-        const isValidType = ['movie','tv'].includes(item.media_type);
-        const matchType = type ? item.media_type === type : true;
-        const matchGenre = genre ? item.genre_ids?.includes(parseInt(genre)) : true;
-        const rawDate = item.release_date || item.first_air_date || '';
-        const itemYear = rawDate.split('-')[0];
-        const matchYear = year ? itemYear === year : true;
-        return isValidType && matchType && matchGenre && matchYear;
+      // mostra risultati
+      const box = document.getElementById('results');
+      box.innerHTML = '';
+      filtered.slice(0, 20).forEach(i => {
+        box.appendChild(createCard(i, i.media_type || (t || 'movie')));
       });
-
-     filtered.forEach(item => {
-        container.appendChild(createCard(item, item.media_type));
-      });
-
       document.getElementById('results-section').classList.remove('hidden');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      // carica iniziale
       loadGenres();
       loadSection('/trending/movie/week', 'trending', 'movie');
       loadSection('/tv/popular', 'tv', 'tv');
       loadSection('/movie/top_rated', 'top', 'movie');
       loadSection('/movie/upcoming', 'upcoming', 'movie');
 
-      document.getElementById('search').onclick = search;
+      // toggla dropdown
+      const bar = document.getElementById('search-bar');
+      const dd  = document.getElementById('search-dropdown');
+      bar.addEventListener('click', e => {
+        e.stopPropagation();
+        dd.classList.toggle('hidden');
+        document.getElementById('filter-title').focus();
+      });
+      // chiudi cliccando fuori
+      document.addEventListener('click', () => dd.classList.add('hidden'));
+
+      // bind ricerca
+      document.getElementById('btn-search').onclick = doSearch;
     });
   </script>
 
