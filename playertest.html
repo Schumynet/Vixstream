@@ -2,71 +2,50 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Merlin S1:E6 Episodio 6</title>
+  <title>Player di Test</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
-    body {
-      margin: 0;
-      background: #000;
-      font-family: sans-serif;
-      color: #fff;
-    }
-    #player-container {
-      position: relative;
-      max-width: 960px;
-      margin: 0 auto;
-      background: #000;
-      overflow: hidden;
-    }
+    body { margin: 0; background: #000; font-family: sans-serif; color: #fff; }
+    #player-container { position: relative; max-width: 960px; margin: 0 auto; overflow: hidden; }
+
     video {
       width: 100%;
-      height: auto;
       display: block;
       background: #000;
     }
 
-    /* Controlli centrali */
-    .center-controls {
+    .center-controls,
+    .timestamp-bar,
+    .bottom-bar {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      left: 0; right: 0;
       display: flex;
-      gap: 20px;
       align-items: center;
-      justify-content: center;
       opacity: 0;
       transition: opacity 0.3s ease;
       z-index: 2;
     }
+
+    .center-controls {
+      top: 50%;
+      transform: translate(-50%, -50%) translateX(50%);
+      justify-content: center;
+      gap: 20px;
+    }
     .center-controls button {
       background: rgba(255,255,255,0.15);
-      border: none;
-      color: #fff;
-      font-size: 18px;
-      padding: 10px 14px;
+      border: none; color: #fff;
+      font-size: 18px; padding: 10px;
       border-radius: 50%;
     }
 
-    /* Barra del timestamp */
     .timestamp-bar {
-      position: absolute;
       bottom: 60px;
-      left: 0;
-      right: 0;
-      display: flex;
-      align-items: center;
       justify-content: space-between;
       padding: 0 12px;
       font-size: 14px;
       color: #fff;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 1;
-    }
-    .timestamp-bar #timeDisplay {
-      white-space: nowrap;
     }
     .timestamp-bar #seekBar {
       flex: 1;
@@ -77,37 +56,61 @@
     }
     .timestamp-bar #seekBar::-webkit-slider-thumb {
       appearance: none;
-      width: 12px;
-      height: 12px;
+      width: 12px; height: 12px;
       background: red;
       border-radius: 50%;
       cursor: pointer;
     }
 
-    /* Barra inferiore compatta */
     .bottom-bar {
-      position: absolute;
       bottom: 0;
-      left: 0;
-      right: 0;
-      display: flex;
       justify-content: flex-end;
-      align-items: center;
       padding: 8px 12px;
       background: rgba(0,0,0,0.7);
       font-size: 14px;
-      gap: 10px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 1;
+      gap: 8px;
     }
     .bottom-bar select,
     .bottom-bar button {
       background: rgba(255,255,255,0.1);
-      border: none;
-      color: #fff;
+      border: none; color: #fff;
       padding: 4px 8px;
       border-radius: 4px;
+    }
+
+    /* Overlay ricerca */
+    #searchOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      z-index: 5;
+    }
+    #searchOverlay input {
+      width: 100%;
+      max-width: 400px;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    #searchResults {
+      width: 100%;
+      max-width: 400px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .search-item {
+      padding: 8px 12px;
+      border-bottom: 1px solid #333;
+      cursor: pointer;
+    }
+    .search-item:hover {
+      background: rgba(255,255,255,0.1);
     }
 
     .meta {
@@ -122,12 +125,8 @@
 <body>
 
   <div id="player-container">
-    <video id="video"
-           poster="https://image.tmdb.org/t/p/w300/your-poster.jpg"
-           crossorigin="anonymous">
-    </video>
+    <video id="video" poster="" crossorigin="anonymous"></video>
 
-    <!-- Overlay controlli centrali -->
     <div class="center-controls" id="centerControls">
       <button id="prevEpisode">⏮</button>
       <button id="rewind">⏪</button>
@@ -136,14 +135,13 @@
       <button id="nextEpisode">⏭</button>
     </div>
 
-    <!-- Barra timestamp -->
     <div class="timestamp-bar" id="timestampBar">
       <span id="timeDisplay">00:00 / 00:00</span>
       <input type="range" id="seekBar" value="0" min="0" step="0.1">
     </div>
 
-    <!-- Barra inferiore compatta -->
     <div class="bottom-bar" id="bottomBar">
+      <button id="searchBtn">🔍</button>
       <select id="audio"></select>
       <select id="subtitle"></select>
       <select id="quality"></select>
@@ -151,138 +149,172 @@
     </div>
   </div>
 
-  <div class="meta">
-    <strong>Titolo:</strong> Merlin S1:E6 Episodio 6<br>
-    <strong>Durata:</strong> 43:31<br>
-    <strong>Trama:</strong> Mentre la magia si diffonde nel regno, Merlin affronta una nuova minaccia che potrebbe cambiare il
-    destino di Camelot...
+  <div id="searchOverlay">
+    <input type="text" id="searchInput" placeholder="Cerca titolo o episodio…" />
+    <div id="searchResults"></div>
+    <button id="closeSearch" style="
+      margin-top:12px;
+      background:rgba(255,255,255,0.1);
+      border:none;color:#fff;
+      padding:6px 12px;border-radius:4px;">
+      Chiudi
+    </button>
+  </div>
+
+  <div class="meta" id="metaInfo">
+    <strong id="metaTitle">Merlin S1:E6 Episodio 6</strong><br>
+    <span id="metaDuration">Durata: 43:31</span><br>
+    <span id="metaPlot">Trama: Mentre la magia …</span>
   </div>
 
   <script>
-    const video         = document.getElementById('video');
-    const playPause     = document.getElementById('playPause');
-    const rewindBtn     = document.getElementById('rewind');
-    const forwardBtn    = document.getElementById('forward');
-    const prevEp        = document.getElementById('prevEpisode');
-    const nextEp        = document.getElementById('nextEpisode');
-    const seekBar       = document.getElementById('seekBar');
-    const timeDisplay   = document.getElementById('timeDisplay');
-    const qualitySelect = document.getElementById('quality');
-    const audioSelect   = document.getElementById('audio');
-    const subtitleSelect= document.getElementById('subtitle');
-    const fullscreenBtn = document.getElementById('fullscreen');
-    const centerControls= document.getElementById('centerControls');
-    const bottomBar     = document.getElementById('bottomBar');
-    const timestampBar  = document.getElementById('timestampBar');
+    const video          = document.getElementById('video');
+    const playPause      = document.getElementById('playPause');
+    const rewindBtn      = document.getElementById('rewind');
+    const forwardBtn     = document.getElementById('forward');
+    const prevEp         = document.getElementById('prevEpisode');
+    const nextEp         = document.getElementById('nextEpisode');
+    const seekBar        = document.getElementById('seekBar');
+    const timeDisplay    = document.getElementById('timeDisplay');
+    const qualitySelect  = document.getElementById('quality');
+    const audioSelect    = document.getElementById('audio');
+    const subtitleSelect = document.getElementById('subtitle');
+    const fullscreenBtn  = document.getElementById('fullscreen');
+    const centerControls = document.getElementById('centerControls');
+    const bottomBar      = document.getElementById('bottomBar');
+    const timestampBar   = document.getElementById('timestampBar');
 
-    const hls = new Hls();
-    hls.loadSource("https://vixstreamproxy.onrender.com/stream?url=https%3A%2F%2Fvixsrc.to%2Fplaylist%2F214325%3Ftoken%3D68b0185497fb3dd182e53461e7d6a53b%26expires%3D1763851642%26h%3D1");
-    hls.attachMedia(video);
+    const searchBtn      = document.getElementById('searchBtn');
+    const closeSearch    = document.getElementById('closeSearch');
+    const searchOverlay  = document.getElementById('searchOverlay');
+    const searchInput    = document.getElementById('searchInput');
+    const searchResults  = document.getElementById('searchResults');
 
-    hls.on(Hls.Events.MANIFEST_PARSED, (_e, data) => {
-      qualitySelect.innerHTML = '<option value="-1">Auto</option>' +
-        data.levels.map((lvl,i) =>
-          `<option value="${i}">${lvl.height}p</option>`
-        ).join('');
-    });
+    const metaTitle      = document.getElementById('metaTitle');
+    const metaDuration   = document.getElementById('metaDuration');
+    const metaPlot       = document.getElementById('metaPlot');
 
-    hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_e, data) => {
-      audioSelect.innerHTML = data.audioTracks
-        .map((t,i) => `<option value="${i}">${t.name||'Track '+i}</option>`)
-        .join('');
-    });
-
-    hls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, (_e, data) => {
-      subtitleSelect.innerHTML = '<option value="-1">Nessuno</option>' +
-        data.subtitleTracks
-          .map((t,i) => `<option value="${i}">${t.name||'Sub '+i}</option>`)
-          .join('');
-    });
-
-    qualitySelect.onchange = () =>
-      hls.currentLevel = parseInt(qualitySelect.value,10);
-    audioSelect.onchange = () =>
-      hls.audioTrack   = parseInt(audioSelect.value,10);
-    subtitleSelect.onchange = () => {
-      const idx = parseInt(subtitleSelect.value,10);
-      hls.subtitleTrack = idx;
-      video.textTracks.forEach((tt,i) =>
-        tt.mode = (i===idx ? 'showing' : 'disabled')
-      );
-    };
-
-    playPause.onclick = () => {
-      if (video.paused) {
-        video.play();
-        playPause.textContent = '⏸';
-      } else {
-        video.pause();
-        playPause.textContent = '▶️';
-      }
-    };
-
-    rewindBtn.onclick = () =>
-      video.currentTime = Math.max(0, video.currentTime - 10);
-
-    forwardBtn.onclick = () =>
-      video.currentTime = Math.min(video.duration, video.currentTime + 10);
-
-    prevEp.onclick = () => {
-      // carica episodio precedente
-      console.log('Carica episodio precedente');
-    };
-    nextEp.onclick = () => {
-      // carica episodio successivo
-      console.log('Carica episodio successivo');
-    };
-
-    video.addEventListener('timeupdate', () => {
-      seekBar.max = video.duration;
-      seekBar.value = video.currentTime;
-      timeDisplay.textContent =
-        formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
-    });
-
-    seekBar.oninput = () =>
-      video.currentTime = parseFloat(seekBar.value);
-
-    fullscreenBtn.onclick = () => {
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      } else {
-        document.getElementById('player-container').requestFullscreen();
-      }
-    };
-
-    function formatTime(sec) {
-      const m = Math.floor(sec/60);
-      const s = Math.floor(sec%60);
-      return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-    }
-
-    // auto-hide
     let hideTimeout;
     function showControls() {
-      centerControls.style.opacity = '1';
-      bottomBar.style.opacity     = '1';
-      timestampBar.style.opacity  = '1';
+      [centerControls, bottomBar, timestampBar].forEach(el => el.style.opacity = '1');
       clearTimeout(hideTimeout);
       hideTimeout = setTimeout(() => {
-        centerControls.style.opacity = '0';
-        bottomBar.style.opacity     = '0';
-        timestampBar.style.opacity  = '0';
+        [centerControls, bottomBar, timestampBar].forEach(el => el.style.opacity = '0');
       }, 3000);
     }
 
     ['mousemove','touchstart','play','pause','seeking','seeked']
       .forEach(evt => video.addEventListener(evt, showControls));
-
     [centerControls, bottomBar, timestampBar].forEach(el => {
       el.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
       el.addEventListener('mouseleave', showControls);
     });
-
     video.addEventListener('loadedmetadata', showControls);
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+      return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
+    // HLS + loadEpisode
+    let hlsInstance;
+    function loadEpisode(ep) {
+      if (hlsInstance) hlsInstance.destroy();
+      const h = new Hls();
+      h.loadSource(ep.url);
+      h.attachMedia(video);
+      hlsInstance = h;
+
+      video.poster = ep.poster;
+      metaTitle.textContent = ep.title;
+      metaDuration.textContent = 'Durata: ' + ep.duration;
+      metaPlot.textContent = 'Trama: ' + ep.plot;
+
+      h.on(Hls.Events.MANIFEST_PARSED, (_e, data) => {
+        qualitySelect.innerHTML =
+          '<option value="-1">Auto</option>' +
+          data.levels.map((lvl, i) =>
+            `<option value="${i}">${lvl.height}p</option>`
+          ).join('');
+      });
+      h.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_e, data) => {
+        audioSelect.innerHTML = data.audioTracks
+          .map((t, i) =>
+            `<option value="${i}">${t.name || 'Track ' + i}</option>`
+          ).join('');
+      });
+      h.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, (_e, data) => {
+        subtitleSelect.innerHTML =
+          '<option value="-1">Nessuno</option>' +
+          data.subtitleTracks.map((t, i) =>
+            `<option value="${i}">${t.name || 'Sub ' + i}</option>`
+          ).join('');
+      });
+    }
+
+    // Caricamento iniziale di test
+    loadEpisode({
+      url: 'https://vixstreamproxy.onrender.com/stream?url=…',
+      title: 'Merlin S1:E6 Episodio 6',
+      poster: 'https://image.tmdb.org/t/p/w300/your-poster.jpg',
+      duration: '43:31',
+      plot: 'Mentre la magia si diffonde…'
+    });
+
+    // Controlli base
+    playPause.onclick = () => {
+      if (video.paused) video.play(); else video.pause();
+      playPause.textContent = video.paused ? '▶️' : '⏸';
+    };
+    rewindBtn.onclick = () => video.currentTime = Math.max(0, video.currentTime - 10);
+    forwardBtn.onclick = () => video.currentTime = Math.min(video.duration, video.currentTime + 10);
+    fullscreenBtn.onclick = () => {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.getElementById('player-container').requestFullscreen();
+    };
+
+    video.addEventListener('timeupdate', () => {
+      seekBar.max = video.duration;
+      seekBar.value = video.currentTime;
+      timeDisplay.textContent = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
+    });
+    seekBar.oninput = () => video.currentTime = parseFloat(seekBar.value);
+
+    // Ricerca
+    searchBtn.onclick = () => { searchOverlay.style.display = 'flex'; searchInput.focus(); };
+    closeSearch.onclick = () => searchOverlay.style.display = 'none';
+    searchInput.onkeydown = e => {
+      if (e.key === 'Enter') {
+        const q = encodeURIComponent(searchInput.value.trim());
+        fetch(`/api/search?query=${q}`)
+          .then(r => r.json())
+          .then(list => {
+            searchResults.innerHTML = list.map(ep =>
+              `<div class="search-item"
+                    data-url="${ep.url}"
+                    data-title="${ep.title}"
+                    data-poster="${ep.poster}"
+                    data-duration="${ep.duration}"
+                    data-plot="${ep.plot}">
+                 ${ep.title}
+               </div>`
+            ).join('');
+          });
+      }
+    };
+    searchResults.onclick = e => {
+      const item = e.target.closest('.search-item');
+      if (!item) return;
+      const ep = {
+        url: item.dataset.url,
+        title: item.dataset.title,
+        poster: item.dataset.poster,
+        duration: item.dataset.duration,
+        plot: item.dataset.plot
+      };
+      loadEpisode(ep);
+      searchOverlay.style.display = 'none';
+    };
   </script>
 </body>
 </html>
