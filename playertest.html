@@ -2,123 +2,101 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Player di Test</title>
+  <title>Player di Test con TMDB Search</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
-    body { margin: 0; background: #000; font-family: sans-serif; color: #fff; }
-    #player-container { position: relative; max-width: 960px; margin: 0 auto; overflow: hidden; }
+    body { margin:0; background:#000; font-family:sans-serif; color:#fff; }
+    #player-container { position:relative; max-width:960px; margin:0 auto; overflow:hidden; }
+    video { width:100%; display:block; background:#000; }
 
-    video {
-      width: 100%;
-      display: block;
-      background: #000;
+    /* overlay dei controlli */
+    .center-controls, .timestamp-bar, .bottom-bar {
+      position:absolute; left:0; right:0; display:flex;
+      align-items:center; opacity:0; transition:opacity .3s;
+      z-index:2;
     }
-
-    .center-controls,
-    .timestamp-bar,
-    .bottom-bar {
-      position: absolute;
-      left: 0; right: 0;
-      display: flex;
-      align-items: center;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 2;
-    }
-
     .center-controls {
-      top: 50%;
-      transform: translate(-50%, -50%) translateX(50%);
-      justify-content: center;
-      gap: 20px;
+      top:50%; transform:translate(-50%,-50%) translateX(50%);
+      justify-content:center; gap:20px;
     }
     .center-controls button {
-      background: rgba(255,255,255,0.15);
-      border: none; color: #fff;
-      font-size: 18px; padding: 10px;
-      border-radius: 50%;
+      background:rgba(255,255,255,.15); border:none; color:#fff;
+      font-size:18px; padding:10px; border-radius:50%;
     }
 
     .timestamp-bar {
-      bottom: 60px;
-      justify-content: space-between;
-      padding: 0 12px;
-      font-size: 14px;
-      color: #fff;
+      bottom:60px; justify-content:space-between;
+      padding:0 12px; font-size:14px; color:#fff;
     }
     .timestamp-bar #seekBar {
-      flex: 1;
-      margin: 0 10px;
-      height: 4px;
-      background: #444;
-      appearance: none;
+      flex:1; margin:0 10px; height:4px; background:#444; appearance:none;
     }
     .timestamp-bar #seekBar::-webkit-slider-thumb {
-      appearance: none;
-      width: 12px; height: 12px;
-      background: red;
-      border-radius: 50%;
-      cursor: pointer;
+      width:12px; height:12px; background:red; border-radius:50%;
+      cursor:pointer; appearance:none;
     }
 
     .bottom-bar {
-      bottom: 0;
-      justify-content: flex-end;
-      padding: 8px 12px;
-      background: rgba(0,0,0,0.7);
-      font-size: 14px;
-      gap: 8px;
+      bottom:0; justify-content:flex-end;
+      padding:8px 12px; background:rgba(0,0,0,.7);
+      font-size:14px; gap:8px;
     }
-    .bottom-bar select,
-    .bottom-bar button {
-      background: rgba(255,255,255,0.1);
-      border: none; color: #fff;
-      padding: 4px 8px;
-      border-radius: 4px;
+    .bottom-bar select, .bottom-bar button {
+      background:rgba(255,255,255,.1); border:none;
+      color:#fff; padding:4px 8px; border-radius:4px;
     }
 
-    /* Overlay ricerca */
+    /* overlay di ricerca */
     #searchOverlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.85);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-      z-index: 5;
+      position:fixed; top:0; left:0; right:0; bottom:0;
+      background:rgba(0,0,0,.85); display:none;
+      flex-direction:column; align-items:center;
+      padding:20px; z-index:5;
     }
-    #searchOverlay input {
-      width: 100%;
-      max-width: 400px;
-      padding: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 4px;
-      margin-bottom: 12px;
+    #searchInput {
+      width:100%; max-width:400px;
+      padding:10px; font-size:16px;
+      border:none; border-radius:4px;
+      margin-bottom:12px;
     }
-    #searchResults {
-      width: 100%;
-      max-width: 400px;
-      overflow-y: auto;
-      flex: 1;
+    #searchList, #detailView {
+      width:100%; max-width:400px;
+      background:#111; border-radius:4px;
+      overflow:auto; flex:1;
+      margin-bottom:12px;
     }
     .search-item {
-      padding: 8px 12px;
-      border-bottom: 1px solid #333;
-      cursor: pointer;
+      display:flex; gap:8px; padding:8px;
+      border-bottom:1px solid #333; cursor:pointer;
     }
-    .search-item:hover {
-      background: rgba(255,255,255,0.1);
+    .search-item img {
+      width:50px; height:75px; object-fit:cover;
+      border-radius:2px;
+    }
+    .search-item div {
+      display:flex; flex-direction:column;
+      justify-content:center;
+    }
+    .search-item div small { color:#aaa; }
+
+    #detailView { display:none; flex-direction:column; gap:12px; padding:12px; }
+    #detailView img {
+      width:100%; border-radius:4px; object-fit:cover;
+    }
+    #detailView h3 { margin:0; font-size:1.2em; }
+    #detailView p { margin:0; font-size:0.95em; line-height:1.4; }
+    #detailActions { display:flex; gap:12px; justify-content:flex-end; }
+    #detailActions button {
+      background:rgba(255,255,255,.1); border:none;
+      color:#fff; padding:8px 12px; border-radius:4px;
+      font-size:1em; cursor:pointer;
     }
 
     .meta {
-      max-width: 960px;
-      margin: 20px auto;
-      font-size: 0.95em;
-      line-height: 1.4;
-      padding: 0 10px;
+      max-width:960px; margin:20px auto;
+      font-size:0.95em; line-height:1.4;
+      padding:0 10px;
     }
   </style>
 </head>
@@ -149,14 +127,28 @@
     </div>
   </div>
 
+  <!-- overlay ricerca / dettaglio -->
   <div id="searchOverlay">
-    <input type="text" id="searchInput" placeholder="Cerca titolo o episodio…" />
-    <div id="searchResults"></div>
+    <input id="searchInput" type="text" placeholder="Cerca su TMDB…" />
+
+    <!-- Lista risultati -->
+    <div id="searchList"></div>
+
+    <!-- Scheda dettaglio -->
+    <div id="detailView">
+      <img id="detailPoster" src="" alt="Poster">
+      <h3 id="detailTitle"></h3>
+      <small id="detailYear"></small>
+      <p id="detailPlot"></p>
+      <div id="detailActions">
+        <button id="detailBack">◀ Torna indietro</button>
+        <button id="detailPlay">▶️ Play</button>
+      </div>
+    </div>
+
     <button id="closeSearch" style="
-      margin-top:12px;
-      background:rgba(255,255,255,0.1);
-      border:none;color:#fff;
-      padding:6px 12px;border-radius:4px;">
+      background:rgba(255,255,255,.1); border:none;
+      color:#fff; padding:6px 12px; border-radius:4px;">
       Chiudi
     </button>
   </div>
@@ -188,7 +180,14 @@
     const closeSearch    = document.getElementById('closeSearch');
     const searchOverlay  = document.getElementById('searchOverlay');
     const searchInput    = document.getElementById('searchInput');
-    const searchResults  = document.getElementById('searchResults');
+    const searchList     = document.getElementById('searchList');
+    const detailView     = document.getElementById('detailView');
+    const detailPoster   = document.getElementById('detailPoster');
+    const detailTitle    = document.getElementById('detailTitle');
+    const detailYear     = document.getElementById('detailYear');
+    const detailPlot     = document.getElementById('detailPlot');
+    const detailBack     = document.getElementById('detailBack');
+    const detailPlay     = document.getElementById('detailPlay');
 
     const metaTitle      = document.getElementById('metaTitle');
     const metaDuration   = document.getElementById('metaDuration');
@@ -196,63 +195,62 @@
 
     let hideTimeout;
     function showControls() {
-      [centerControls, bottomBar, timestampBar].forEach(el => el.style.opacity = '1');
+      [centerControls, bottomBar, timestampBar].forEach(el=>el.style.opacity='1');
       clearTimeout(hideTimeout);
-      hideTimeout = setTimeout(() => {
-        [centerControls, bottomBar, timestampBar].forEach(el => el.style.opacity = '0');
-      }, 3000);
+      hideTimeout = setTimeout(()=>{
+        [centerControls, bottomBar, timestampBar].forEach(el=>el.style.opacity='0');
+      },3000);
     }
-
     ['mousemove','touchstart','play','pause','seeking','seeked']
-      .forEach(evt => video.addEventListener(evt, showControls));
-    [centerControls, bottomBar, timestampBar].forEach(el => {
-      el.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
-      el.addEventListener('mouseleave', showControls);
+      .forEach(evt=>video.addEventListener(evt, showControls));
+    [centerControls,bottomBar,timestampBar].forEach(el=>{
+      el.addEventListener('mouseenter',()=>clearTimeout(hideTimeout));
+      el.addEventListener('mouseleave',showControls);
     });
     video.addEventListener('loadedmetadata', showControls);
 
-    function formatTime(sec) {
-      const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
-      return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    function formatTime(s){
+      const m=Math.floor(s/60), sec=Math.floor(s%60);
+      return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
     }
 
-    // HLS + loadEpisode
+    // HLS & loadEpisode
     let hlsInstance;
-    function loadEpisode(ep) {
-      if (hlsInstance) hlsInstance.destroy();
+    function loadEpisode(ep){
+      if(hlsInstance) hlsInstance.destroy();
       const h = new Hls();
       h.loadSource(ep.url);
       h.attachMedia(video);
       hlsInstance = h;
 
-      video.poster = ep.poster;
-      metaTitle.textContent = ep.title;
-      metaDuration.textContent = 'Durata: ' + ep.duration;
-      metaPlot.textContent = 'Trama: ' + ep.plot;
+      video.poster       = ep.poster;
+      metaTitle.textContent    = ep.title;
+      metaDuration.textContent = 'Durata: '+ep.duration;
+      metaPlot.textContent     = 'Trama: '+ep.plot;
 
-      h.on(Hls.Events.MANIFEST_PARSED, (_e, data) => {
+      h.on(Hls.Events.MANIFEST_PARSED,(_,data)=>{
         qualitySelect.innerHTML =
-          '<option value="-1">Auto</option>' +
-          data.levels.map((lvl, i) =>
+          '<option value="-1">Auto</option>'+
+          data.levels.map((lvl,i)=>
             `<option value="${i}">${lvl.height}p</option>`
           ).join('');
       });
-      h.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_e, data) => {
+      h.on(Hls.Events.AUDIO_TRACKS_UPDATED,(_,data)=>{
         audioSelect.innerHTML = data.audioTracks
-          .map((t, i) =>
-            `<option value="${i}">${t.name || 'Track ' + i}</option>`
+          .map((t,i)=>
+            `<option value="${i}">${t.name||'Track '+i}</option>`
           ).join('');
       });
-      h.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, (_e, data) => {
+      h.on(Hls.Events.SUBTITLE_TRACKS_UPDATED,(_,data)=>{
         subtitleSelect.innerHTML =
-          '<option value="-1">Nessuno</option>' +
-          data.subtitleTracks.map((t, i) =>
-            `<option value="${i}">${t.name || 'Sub ' + i}</option>`
+          '<option value="-1">Nessuno</option>'+
+          data.subtitleTracks.map((t,i)=>
+            `<option value="${i}">${t.name||'Sub '+i}</option>`
           ).join('');
       });
     }
 
-    // Caricamento iniziale di test
+    // caricamento iniziale
     loadEpisode({
       url: 'https://vixstreamproxy.onrender.com/stream?url=…',
       title: 'Merlin S1:E6 Episodio 6',
@@ -261,59 +259,87 @@
       plot: 'Mentre la magia si diffonde…'
     });
 
-    // Controlli base
-    playPause.onclick = () => {
-      if (video.paused) video.play(); else video.pause();
+    // controlli base
+    playPause.onclick = ()=>{
+      if(video.paused) video.play(); else video.pause();
       playPause.textContent = video.paused ? '▶️' : '⏸';
     };
-    rewindBtn.onclick = () => video.currentTime = Math.max(0, video.currentTime - 10);
-    forwardBtn.onclick = () => video.currentTime = Math.min(video.duration, video.currentTime + 10);
-    fullscreenBtn.onclick = () => {
-      if (document.fullscreenElement) document.exitFullscreen();
-      else document.getElementById('player-container').requestFullscreen();
+    rewindBtn.onclick  = ()=> video.currentTime = Math.max(0, video.currentTime-10);
+    forwardBtn.onclick = ()=> video.currentTime = Math.min(video.duration, video.currentTime+10);
+    fullscreenBtn.onclick = ()=>{
+      document.fullscreenElement?
+        document.exitFullscreen():
+        document.getElementById('player-container').requestFullscreen();
     };
 
-    video.addEventListener('timeupdate', () => {
+    video.addEventListener('timeupdate',()=>{
       seekBar.max = video.duration;
       seekBar.value = video.currentTime;
-      timeDisplay.textContent = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
+      timeDisplay.textContent = formatTime(video.currentTime)+' / '+formatTime(video.duration);
     });
-    seekBar.oninput = () => video.currentTime = parseFloat(seekBar.value);
+    seekBar.oninput = ()=> video.currentTime = parseFloat(seekBar.value);
 
-    // Ricerca
-    searchBtn.onclick = () => { searchOverlay.style.display = 'flex'; searchInput.focus(); };
-    closeSearch.onclick = () => searchOverlay.style.display = 'none';
-    searchInput.onkeydown = e => {
-      if (e.key === 'Enter') {
-        const q = encodeURIComponent(searchInput.value.trim());
-        fetch(`/api/search?query=${q}`)
-          .then(r => r.json())
-          .then(list => {
-            searchResults.innerHTML = list.map(ep =>
-              `<div class="search-item"
-                    data-url="${ep.url}"
-                    data-title="${ep.title}"
-                    data-poster="${ep.poster}"
-                    data-duration="${ep.duration}"
-                    data-plot="${ep.plot}">
-                 ${ep.title}
-               </div>`
-            ).join('');
-          });
-      }
+    // ricerca TMDB
+    searchBtn.onclick = ()=>{
+      searchList.style.display   = 'block';
+      detailView.style.display   = 'none';
+      searchOverlay.style.display= 'flex';
+      searchInput.value          = '';
+      searchList.innerHTML       = '';
+      searchInput.focus();
     };
-    searchResults.onclick = e => {
-      const item = e.target.closest('.search-item');
-      if (!item) return;
-      const ep = {
-        url: item.dataset.url,
-        title: item.dataset.title,
-        poster: item.dataset.poster,
-        duration: item.dataset.duration,
-        plot: item.dataset.plot
-      };
-      loadEpisode(ep);
-      searchOverlay.style.display = 'none';
+    closeSearch.onclick = ()=> searchOverlay.style.display = 'none';
+
+    searchInput.onkeydown = e=>{
+      if(e.key!=='Enter') return;
+      const q = encodeURIComponent(searchInput.value.trim());
+      fetch(`/api/tmdb/search?query=${q}`)
+        .then(r=>r.json())
+        .then(list=>{
+          searchList.innerHTML = list.map(item=>
+            `<div class="search-item" data-id="${item.id}">
+               <img src="${item.poster}" alt="">
+               <div>
+                 <strong>${item.title}</strong>
+                 <small>${item.year}</small>
+               </div>
+             </div>`
+          ).join('');
+        });
+    };
+
+    searchList.onclick = e=>{
+      const el = e.target.closest('.search-item');
+      if(!el) return;
+      const id = el.dataset.id;
+      fetch(`/api/tmdb/movie?id=${id}`)
+        .then(r=>r.json())
+        .then(movie=>{
+          // mostra dettaglio
+          detailPoster.src    = movie.poster;
+          detailTitle.textContent = movie.title;
+          detailYear.textContent  = movie.year;
+          detailPlot.textContent  = movie.overview;
+          detailView.style.display= 'flex';
+          searchList.style.display= 'none';
+
+          // play carica con url restituito
+          detailPlay.onclick = ()=>{
+            loadEpisode({
+              url: movie.stream_url,
+              title: movie.title,
+              poster: movie.poster,
+              duration: movie.duration,
+              plot: movie.overview
+            });
+            searchOverlay.style.display = 'none';
+          };
+        });
+    };
+
+    detailBack.onclick = ()=>{
+      detailView.style.display = 'none';
+      searchList.style.display = 'block';
     };
   </script>
 </body>
